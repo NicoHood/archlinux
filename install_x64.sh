@@ -157,12 +157,22 @@ check_dependency pacstrap arch-chroot genfstab btrfs mkfs.fat sed cryptsetup \
 
 # Device check
 if [[ ! -b "${DEVICE}" ]]; then
-    die "Not a valid device: ${DEVICE}"
+    die "Not a valid device: '${DEVICE}'"
 fi
 
 # Mountpoint check
 if [[ ! -d "${MOUNT}" ]] ; then
-    die "Not a valid mountpoint directory: ${MOUNT}"
+    die "Not a valid mountpoint directory: '${MOUNT}'"
+fi
+
+# Check if backup dir exists if used
+if [[ -n "${BACKUP}" && ! -d "${BACKUP}" ]]; then
+    die "Not a valid backup directory: '${BACKUP}'"
+fi
+
+# Warn when random is used, and recommend to start rngd.service
+if [[ "${RANDOM_SOURCE}" == "random" && "$(systemctl is-active rngd)" != "active" ]]; then
+    warning "No rngd serivice running. Creating crypto disks may take a very long time."
 fi
 
 # User check
