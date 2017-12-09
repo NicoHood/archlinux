@@ -1,0 +1,6 @@
+NetworkManager
+bluetooth
+gdm
+org.cups.cupsd
+avahi-daemon
+rngd

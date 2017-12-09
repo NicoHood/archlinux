@@ -1,0 +1,17 @@
+base
+linux-lts
+linux-lts-headers
+linux-headers
+grub
+efibootmgr
+bash-completion
+intel-ucode
+os-prober
+rng-tools
+sudo
+ttf-dejavu
+ttf-liberation
+btrfs-progs
+dosfstools
+ntfs-3g
+rng-tools
