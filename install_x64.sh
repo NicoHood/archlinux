@@ -319,6 +319,7 @@ fi
 
 msg "3 Configure the system"
 msg2 "3.1 Fstab"
+cp "${MOUNT}"/etc/fstab "${MOUNT}"/etc/fstab.bak
 genfstab -U "${MOUNT}" > "${MOUNT}"/etc/fstab
 
 msg2 "3.1 Chroot"
