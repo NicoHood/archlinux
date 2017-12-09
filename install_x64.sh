@@ -127,7 +127,7 @@ if [[ "${yesno}" != [Yy]"es" && "${yesno}" != [Yy] ]]; then
     MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
     RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
     BTRFS="${BTRFS:-y}"
-    LUKS="${LUKS:-n}"
+    LUKS="${LUKS:-y}"
     VM="${VM:-n}"
 else
     # VM installation
