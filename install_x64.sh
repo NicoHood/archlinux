@@ -119,6 +119,7 @@ PASSWD_USER="${PASSWD_USER:-toor}"
 PASSWD_ROOT="${PASSWD_ROOT:-root}"
 KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-us}"
 GNOME="${GNOME:-y}"
+BACKUP="${BACKUP:-/.btrfs/snapshots}"
 
 # Desktop/VM presets
 read -rp "Use preset for virtual machine? [y/N]?" yesno
@@ -238,12 +239,33 @@ if [[ "${BTRFS}" == "y" ]]; then
     btrfs subvolume create ${MOUNT}/snapshots
     btrfs subvolume create ${MOUNT}/excludes
 
-    # Create top level subvolumes
-    btrfs subvolume create ${MOUNT}/subvolumes/root
+    # Use external backup to install from
+    if [[ -n "${BACKUP}" ]]; then
+      # Transfer backup snapshots and create read/write snapshots of them
+      SRC_DIR="$(find "${BACKUP}"/root/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
+      btrfs send "${SRC_DIR}" | btrfs receive ${MOUNT}/subvolumes/
+      btrfs subvolume snapshot ${MOUNT}/subvolumes/snapshot ${MOUNT}/subvolumes/root
+      btrfs subvolume delete ${MOUNT}/subvolumes/snapshot
+
+      SRC_DIR="$(find "${BACKUP}"/home/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
+      btrfs send "${SRC_DIR}" | btrfs receive ${MOUNT}/subvolumes/
+      btrfs subvolume snapshot ${MOUNT}/subvolumes/snapshot ${MOUNT}/subvolumes/home
+      btrfs subvolume delete ${MOUNT}/subvolumes/snapshot
+
+      SRC_DIR="$(find "${BACKUP}"/repo/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
+      btrfs send "${SRC_DIR}" | btrfs receive ${MOUNT}/subvolumes/
+      btrfs subvolume snapshot ${MOUNT}/subvolumes/snapshot ${MOUNT}/subvolumes/repo
+      btrfs subvolume delete ${MOUNT}/subvolumes/snapshot
+    else
+      # Create top level subvolumes
+      btrfs subvolume create ${MOUNT}/subvolumes/root
+      btrfs subvolume create ${MOUNT}/subvolumes/home
+      btrfs subvolume create ${MOUNT}/subvolumes/repo
+    fi
+
+    # Create subvolumes for snapshots
     btrfs subvolume create ${MOUNT}/snapshots/root
-    btrfs subvolume create ${MOUNT}/subvolumes/home
     btrfs subvolume create ${MOUNT}/snapshots/home
-    btrfs subvolume create ${MOUNT}/subvolumes/repo
     btrfs subvolume create ${MOUNT}/snapshots/repo
 
     # Create subvolumes untracked by snapper
@@ -296,98 +318,113 @@ mkfs.fat -F32 ${DEVICE}2
 mkdir -p "${MOUNT}/boot/efi"
 mount ${DEVICE}2 "${MOUNT}/boot/efi"
 
-msg "2 Installation"
+if [[ -z "${BACKUP}" ]]; then
+    msg "2 Installation"
 
-# Mirror selection
-msg2 "2.1 Select the mirrors"
-warning "System mirrorlist will be used for new installation."
-plain "Please visit https://www.archlinux.org/mirrorlist/ and only use https + ipv4&6 only mirrors."
+    # Mirror selection
+    msg2 "2.1 Select the mirrors"
+    warning "System mirrorlist will be used for new installation."
+    plain "Please visit https://www.archlinux.org/mirrorlist/ and only use https + ipv4&6 only mirrors."
 
-# Install basic system and chroot
-msg2 "2.2 Install the base packages"
+    # Install basic system and chroot
+    msg2 "2.2 Install the base packages"
 
-# Use local package cache for non livecd installations
-if [ -f ~/install.txt ]; then
-    pacstrap "${MOUNT}" - <pkg/base.pacman
-else
-    pacstrap -c "${MOUNT}" - <pkg/base.pacman
+    # Use local package cache for non livecd installations
+    if [ -f ~/install.txt ]; then
+        pacstrap "${MOUNT}" - <pkg/base.pacman
+    else
+        pacstrap -c "${MOUNT}" - <pkg/base.pacman
+    fi
+
+    # TODO
+    # Ask to install gnome desktop
+    # Ask to install virtual box video drivers
 fi
-
-# TODO
-# Ask to install gnome desktop
-# Ask to install virtual box video drivers
 
 msg "3 Configure the system"
 msg2 "3.1 Fstab"
 cp "${MOUNT}"/etc/fstab "${MOUNT}"/etc/fstab.bak
 genfstab -U "${MOUNT}" > "${MOUNT}"/etc/fstab
 
-msg2 "3.1 Chroot"
-# All chroot is done with a separate command to make the script better readable in editors
+if [[ -z "${BACKUP}" ]]; then
+    msg2 "3.1 Chroot"
+    # All chroot is done with a separate command to make the script better readable in editors
 
-# Set time zone
-msg2 "3.3 Time zone"
-ln -sf "/usr/share/zoneinfo/${TIMEZONE}" "${MOUNT}"/etc/localtime
-arch-chroot "${MOUNT}" /bin/bash -c "hwclock --systohc --utc"
-arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable systemd-timesyncd.service"
+    # Set time zone
+    msg2 "3.3 Time zone"
+    ln -sf "/usr/share/zoneinfo/${TIMEZONE}" "${MOUNT}"/etc/localtime
+    arch-chroot "${MOUNT}" /bin/bash -c "hwclock --systohc --utc"
+    arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable systemd-timesyncd.service"
 
-# Set locale, only english language (not keyboard layout!) is supported by this script
-msg2 "3.4 Locale"
-sed -i '/en_US.UTF-8 UTF-8/s/^#//g' "${MOUNT}"/etc/locale.gen
-arch-chroot "${MOUNT}" /bin/bash -c "locale-gen"
-echo 'LANG=en_US.UTF-8' > "${MOUNT}"/etc/locale.conf
-# /etc/locale.conf already contains LANG=en_US.UTF-8 by default
-echo "KEYMAP=${KEYBOARD_LAYOUT}" > "${MOUNT}"/etc/vconsole.conf
+    # Set locale, only english language (not keyboard layout!) is supported by this script
+    msg2 "3.4 Locale"
+    sed -i '/en_US.UTF-8 UTF-8/s/^#//g' "${MOUNT}"/etc/locale.gen
+    arch-chroot "${MOUNT}" /bin/bash -c "locale-gen"
+    echo 'LANG=en_US.UTF-8' > "${MOUNT}"/etc/locale.conf
+    # /etc/locale.conf already contains LANG=en_US.UTF-8 by default
+    echo "KEYMAP=${KEYBOARD_LAYOUT}" > "${MOUNT}"/etc/vconsole.conf
 
-# Hostname
-msg2 "3.5 Hostname"
-echo "${MY_HOSTNAME}" > "${MOUNT}"/etc/hostname
+    # Hostname
+    msg2 "3.5 Hostname"
+    echo "${MY_HOSTNAME}" > "${MOUNT}"/etc/hostname
 
-msg2 "3.6 Network configuration"
-arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable dhcpcd.service"
-warning "dhcpcd.service enabled. Disable it when using NetworkManager.service instead."
+    msg2 "3.6 Network configuration"
+    arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable dhcpcd.service"
+    warning "dhcpcd.service enabled. Disable it when using NetworkManager.service instead."
+fi
 
 # Mkinitcpio
 msg2 "3.7 Initramfs"
 
 if [[ "${LUKS}" == "y" ]]; then
-    # Create and add keys and backup password
-    dd bs=512 count=4 if=/dev/${RANDOM_SOURCE} of=${MOUNT}/root/crypto_keyfile.bin iflag=fullblock
-    sync
+    # Create and add crypto keyfile for faster initramfs unlocking
+    if [[ -z "${BACKUP}" ]]; then
+        dd bs=512 count=4 if=/dev/${RANDOM_SOURCE} of=${MOUNT}/root/crypto_keyfile.bin iflag=fullblock
+        sync
+
+        # Forbit to read initramfs to not get access to embedded crypto keys
+        chmod 000 ${MOUNT}/root/crypto_keyfile.bin
+        chmod 700 "${MOUNT}"/boot/initramfs-linux*
+
+        # Add "keymap, encrypt" hooks and "/usr/bin/btrfs" to binaries
+        sed -i 's/^HOOKS=(.*block/\0 keymap encrypt/g' "${MOUNT}"/etc/mkinitcpio.conf
+        sed -i "s#^FILES=(#\0/root/crypto_keyfile.bin#g" "${MOUNT}"/etc/mkinitcpio.conf
+    fi
+
     echo "${PASSWD_ROOT}" | cryptsetup luksAddKey ${DEVICE}3 ${MOUNT}/root/crypto_keyfile.bin
-
-    # Forbit to read initramfs to not get access to embedded crypto keys
-    chmod 000 ${MOUNT}/root/crypto_keyfile.bin
-    chmod 700 "${MOUNT}"/boot/initramfs-linux*
-
-    # Add "keymap, encrypt" hooks and "/usr/bin/btrfs" to binaries
-    sed -i 's/^HOOKS=(.*block/\0 keymap encrypt/g' "${MOUNT}"/etc/mkinitcpio.conf
-    sed -i "s#^FILES=(#\0/root/crypto_keyfile.bin#g" "${MOUNT}"/etc/mkinitcpio.conf
 fi
-if [[ "${BTRFS}" == "y" ]]; then
+if [[ "${BTRFS}" == "y" && -z "${BACKUP}" ]]; then
     sed -i "s#^BINARIES=(#\0/usr/bin/btrfs#g" "${MOUNT}"/etc/mkinitcpio.conf
 fi
 
 # Generate initramfs
 arch-chroot "${MOUNT}" /bin/bash -c "mkinitcpio -P"
 
-# Add new admin user and disable root account
-msg2 "3.8 Root password"
-sed -i '/%wheel.ALL=(ALL) ALL/s/^# //g' "${MOUNT}/etc/sudoers"
-arch-chroot "${MOUNT}" /bin/bash -c "useradd -m -G wheel,users,lp,uucp -s /bin/bash ${MY_USERNAME,,}"
-echo "${MY_USERNAME,,}:${PASSWD_USER}" | arch-chroot "${MOUNT}" /bin/bash -c "chpasswd"
-arch-chroot "${MOUNT}" /bin/bash -c "chfn -f ${MY_USERNAME} ${MY_USERNAME,,}"
-arch-chroot "${MOUNT}" /bin/bash -c "passwd -l root"
+if [[ -z "${BACKUP}" ]]; then
+    # Add new admin user and disable root account
+    msg2 "3.8 Root password"
+    sed -i '/%wheel.ALL=(ALL) ALL/s/^# //g' "${MOUNT}/etc/sudoers"
+    arch-chroot "${MOUNT}" /bin/bash -c "useradd -m -G wheel,users,lp,uucp -s /bin/bash ${MY_USERNAME,,}"
+    echo "${MY_USERNAME,,}:${PASSWD_USER}" | arch-chroot "${MOUNT}" /bin/bash -c "chpasswd"
+    arch-chroot "${MOUNT}" /bin/bash -c "chfn -f ${MY_USERNAME} ${MY_USERNAME,,}"
+    arch-chroot "${MOUNT}" /bin/bash -c "passwd -l root"
 
-# Create user folders for /data/$USER and /repo/$USER
-arch-chroot "${MOUNT}" /bin/bash -c "install -d -o "${MY_USERNAME,,}" -g "${MY_USERNAME,,}" -m 700 "/data/${MY_USERNAME,,}""
-arch-chroot "${MOUNT}" /bin/bash -c "install -d -o "${MY_USERNAME,,}" -g "${MY_USERNAME,,}" -m 700 "/repo/${MY_USERNAME,,}""
+    # Create user folders for /data/$USER and /repo/$USER
+    arch-chroot "${MOUNT}" /bin/bash -c "install -d -o "${MY_USERNAME,,}" -g "${MY_USERNAME,,}" -m 700 "/data/${MY_USERNAME,,}""
+    arch-chroot "${MOUNT}" /bin/bash -c "install -d -o "${MY_USERNAME,,}" -g "${MY_USERNAME,,}" -m 700 "/repo/${MY_USERNAME,,}""
+fi
 
 # Install grub for efi and bios. Efi installation will only work if you booted with efi.
 msg2 "3.9 Boot loader"
 if [[ "${LUKS}" == "y" ]]; then
-    sed -i "s#^GRUB_CMDLINE_LINUX=\"#\0cryptdevice=UUID=${LUKS_UUID}:cryptroot cryptkey=rootfs:/root/crypto_keyfile.bin#g" \
-        "${MOUNT}/etc/default/grub"
+    if [[ -z "${BACKUP}" ]]; then
+        sed -i "s#^GRUB_CMDLINE_LINUX=\"#\0cryptdevice=UUID=${LUKS_UUID}:cryptroot cryptkey=rootfs:/root/crypto_keyfile.bin#g" \
+            "${MOUNT}/etc/default/grub"
+    else
+        cp "${MOUNT}/etc/default/grub" "${MOUNT}/etc/default/grub.bak"
+        sed -i "s#cryptdevice=UUID=.*:cryptroot#cryptdevice=UUID=${LUKS_UUID}:cryptroot#" \
+            "${MOUNT}/etc/default/grub"
+    fi
     sed -i '/GRUB_ENABLE_CRYPTODISK=y/s/^#//g' "${MOUNT}/etc/default/grub"
 fi
 arch-chroot "${MOUNT}" /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
