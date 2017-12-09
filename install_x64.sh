@@ -339,16 +339,18 @@ if [[ -z "${BACKUP}" ]]; then
     # Install basic system and chroot
     msg2 "2.2 Install the base packages"
 
-    # Use local package cache for non livecd installations
-    if [ -f ~/install.txt ]; then
-        pacstrap "${MOUNT}" - <pkg/base.pacman
-    else
-        pacstrap -c "${MOUNT}" - <pkg/base.pacman
+    # Determine packages to install
+    PACKAGES=("pkg/base.pacman")
+    if [[ -n "${GNOME}" ]]; then
+        PACKAGES+=("pkg/gnome.pacman")
     fi
 
-    # TODO
-    # Ask to install gnome desktop
-    # Ask to install virtual box video drivers
+    # Use local package cache for non livecd installations
+    if [ -f ~/install.txt ]; then
+        cat "${PACKAGES[*]}" | pacstrap "${MOUNT}" -
+    else
+        cat "${PACKAGES[*]}" | pacstrap -c "${MOUNT}" -
+    fi
 fi
 
 msg "3 Configure the system"
@@ -379,8 +381,15 @@ if [[ -z "${BACKUP}" ]]; then
     echo "${MY_HOSTNAME}" > "${MOUNT}"/etc/hostname
 
     msg2 "3.6 Network configuration"
-    arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable dhcpcd.service"
-    warning "dhcpcd.service enabled. Disable it when using NetworkManager.service instead."
+    if [[ -z "${GNOME}" ]]; then
+        arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable dhcpcd.service"
+        warning "dhcpcd.service enabled. Disable it when using NetworkManager.service instead."
+    else
+        # Enable gnome network and other services
+        while read line; do
+            arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable ${line}"
+        done < pkg/gnome.systemd
+    fi
 fi
 
 # Mkinitcpio
