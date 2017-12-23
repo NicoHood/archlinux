@@ -133,7 +133,7 @@ if [[ "${yesno}" != [Yy]"es" && "${yesno}" != [Yy] ]]; then
 else
     # VM installation
     MY_HOSTNAME="${MY_HOSTNAME:-archlinuxvm}"
-    RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
+    RANDOM_SOURCE="${RANDOM_SOURCE:-urandom}"
     BTRFS="${BTRFS:-y}"
     LUKS="${LUKS:-n}"
     VM="${VM:-y}"
