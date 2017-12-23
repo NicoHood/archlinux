@@ -348,9 +348,9 @@ if [[ -z "${BACKUP}" ]]; then
 
     # Use local package cache for non livecd installations
     if [ -f ~/install.txt ]; then
-        cat "${PACKAGES[*]}" | pacstrap "${MOUNT}" -
+        cat "${PACKAGES[@]}" | pacstrap "${MOUNT}" -
     else
-        cat "${PACKAGES[*]}" | pacstrap -c "${MOUNT}" -
+        cat "${PACKAGES[@]}" | pacstrap -c "${MOUNT}" -
     fi
 fi
 
