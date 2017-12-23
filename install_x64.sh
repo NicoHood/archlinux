@@ -119,7 +119,8 @@ PASSWD_USER="${PASSWD_USER:-toor}"
 PASSWD_ROOT="${PASSWD_ROOT:-root}"
 KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-us}"
 GNOME="${GNOME:-y}"
-BACKUP="${BACKUP:-/.btrfs/snapshots}"
+BACKUP="${BACKUP:-""}"
+#BACKUP="${BACKUP:-/.btrfs/snapshots}" #TODO disable by default
 
 # Desktop/VM presets
 read -rp "Use preset for virtual machine? [y/N]?" yesno
