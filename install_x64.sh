@@ -72,6 +72,11 @@ function kill_exit
     exit 1
 }
 
+function abort_exit {
+    warning "Aborted by user."
+    exit 0
+}
+
 function command_not_found_handle
 {
     die "${BASH_SOURCE[0]}: line ${BASH_LINENO[0]}: ${1}: command not found."
@@ -111,21 +116,28 @@ fi
 DEVICE="${1}"
 shift
 
-# Environment variables
-MOUNT="${MOUNT:-/mnt}"
-MY_USERNAME="${MY_USERNAME:-arch}"
-TIMEZONE="${TIMEZONE:-Europe/Berlin}"
-PASSWD_USER="${PASSWD_USER:-toor}"
-PASSWD_ROOT="${PASSWD_ROOT:-root}"
-KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-us}"
-GNOME="${GNOME:-y}"
-BACKUP="${BACKUP:-""}"
-#BACKUP="${BACKUP:-/.btrfs/snapshots}" #TODO disable by default
+# Device check
+if [[ ! -b "${DEVICE}" ]]; then
+    die "Not a valid device: '${DEVICE}'"
+fi
 
-# Desktop/VM presets
-read -rp "Use preset for virtual machine? [y/N]?" yesno
-if [[ "${yesno}" != [Yy]"es" && "${yesno}" != [Yy] ]]; then
+# Check if dependencies are available
+# Dependencies: bash arch-install-scripts btrfs-progs dosfstools sed cryptsetup
+check_dependency pacstrap arch-chroot genfstab btrfs mkfs.fat sed cryptsetup \
+     || die "Please install the missing dependencies."
+
+# Run in interactive mode?
+INTERACTIVE="${INTERACTIVE:-y}"
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    check_dependency whiptail
+fi
+
+# Select preset for vm or real desktop machine
+if [[ "${INTERACTIVE}" != "y" ]] || ! whiptail --title "Preset Selection" \
+            --yesno "Use preset for virtual machine?" \
+            --defaultno 10 60; then
     # Normal installation
+    MY_USERNAME="${MY_USERNAME:-"${SUDO_USER}"}"
     MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
     RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
     BTRFS="${BTRFS:-y}"
@@ -133,6 +145,7 @@ if [[ "${yesno}" != [Yy]"es" && "${yesno}" != [Yy] ]]; then
     VM="${VM:-n}"
 else
     # VM installation
+    MY_USERNAME="${MY_USERNAME:-arch}"
     MY_HOSTNAME="${MY_HOSTNAME:-archlinuxvm}"
     RANDOM_SOURCE="${RANDOM_SOURCE:-urandom}"
     BTRFS="${BTRFS:-y}"
@@ -140,40 +153,173 @@ else
     VM="${VM:-y}"
 fi
 
-read -rp "Customize options? [y/N]?" yesno
-if [[ "${yesno}" != [Yy]"es" && "${yesno}" != [Yy] ]]; then
-    # TODO interactive read with default values
-    # TODO different layouts info ls /usr/share/kbd/keymaps/**/*.map.gz
-    # $(tzselect) TODO default to timezone of the current system: readlink -fe /etc/localtime
-    # TODO check if timezone option exists
-    echo TODO
+# Select keyboard layout
+KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf)"}"
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    KEYBOARD_LAYOUT="$(whiptail --title "Keyboard Layout" \
+        --inputbox "Please enter your desired keyboard layout.\n
+List all available layouts with 'localectl list-keymaps'." \
+        10 60 "${KEYBOARD_LAYOUT}" 3>&1 1>&2 2>&3)" \
+        || abort_exit
+fi
+plain "Using keyboard layout: '${KEYBOARD_LAYOUT}'."
+
+# Check keyboard layout
+if ! grep -Fxq "${KEYBOARD_LAYOUT}" <(localectl list-keymaps); then
+    die "Invalid keyboard layout: ${KEYBOARD_LAYOUT}"
 fi
 
-# TODO print option overview
-
-# Check if dependencies are available
-# Dependencies: bash arch-install-scripts btrfs-progs dosfstools sed cryptsetup
-check_dependency pacstrap arch-chroot genfstab btrfs mkfs.fat sed cryptsetup \
-     || die "Please install the missing dependencies."
-
-# Device check
-if [[ ! -b "${DEVICE}" ]]; then
-    die "Not a valid device: '${DEVICE}'"
+# Select timezone
+TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    if whiptail --title "Timezone" \
+                --yesno "Change timezone? Current setting: '${TIMEZONE}'" \
+                --defaultno 10 60; then
+        TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
+    fi
 fi
+plain "Using timezone: '${TIMEZONE}'."
+
+# Check timezone
+if [[ ! -f "${TIMEZONE}" ]]; then
+    die "Invalid timezone."
+fi
+
+# Select hostname
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    MY_HOSTNAME="$(whiptail --title "Hostname" \
+        --inputbox "Please enter your desired hostname." \
+        10 60 "${MY_HOSTNAME}" 3>&1 1>&2 2>&3)" \
+        || abort_exit
+fi
+plain "Using hostname: '${MY_HOSTNAME}'."
+
+# Check hostname
+if [[ -z "${MY_HOSTNAME}" ]]; then
+    die "Empty hostname."
+fi
+
+# Select username
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    MY_USERNAME="$(whiptail --title "Username" \
+        --inputbox "Please enter your desired username." \
+        10 60 "${MY_USERNAME}" 3>&1 1>&2 2>&3)" \
+        || abort_exit
+fi
+plain "Using username: '${MY_USERNAME}'."
+
+# Check hostname
+if [[ -z "${MY_USERNAME}" ]]; then
+    die "Empty username."
+fi
+
+# Select user password
+PASSWD_USER="${PASSWD_USER:-toor}"
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    PASSWD_USER="$(whiptail --title "User Password" \
+        --passwordbox "Please enter your desired user password (default: toor)." \
+         10 60 "${PASSWD_USER}" 3>&1 1>&2 2>&3)" \
+         || abort_exit
+fi
+
+# Select filesystem: Btrfs/Ext4
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    PARAM=""
+    if [[ "${BTRFS}" != "y" ]]; then
+        PARAM="--defaultno"
+    fi
+    if whiptail --title "Filesystem Selection" \
+                --yesno "Use Btrfs as filesystem (ext4 as alternative)?" \
+                "${PARAM}" 10 60; then
+        BTRFS="y"
+    else
+        BTRFS="n"
+    fi
+fi
+plain "Using Btrfs: ${BTRFS}."
+
+# Enable luks encryption
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    PARAM=""
+    if [[ "${LUKS}" != "y" ]]; then
+        PARAM="--defaultno"
+    fi
+    if whiptail --title "Full Disk Encryption" \
+                --yesno "Encrypt entire disk using Luks?" \
+                "${PARAM}" 10 60; then
+        LUKS="y"
+    else
+        LUKS="n"
+    fi
+fi
+plain "Using luks disk encryption: ${LUKS}."
+
+# Luks root password
+if [[ "${LUKS}" == "y" ]]; then
+    PASSWD_ROOT="${PASSWD_ROOT:-root}"
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        PASSWD_ROOT="$(whiptail --title "Luks Disk Password" \
+            --passwordbox "Please enter your desired Luks disk password (default: root)." \
+             10 60 "${PASSWD_ROOT}" 3>&1 1>&2 2>&3)" \
+             || abort_exit
+    fi
+fi
+
+# Select temporary mountpoint
+MOUNT="${MOUNT:-/mnt}"
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    MOUNT="$(whiptail --title "Mountpoint" \
+        --inputbox "Please select a temporary mountpoint for system installation." \
+        10 60 "${MOUNT}" 3>&1 1>&2 2>&3)" \
+        || abort_exit
+fi
+plain "Using mountpoint: '${MOUNT}'."
 
 # Mountpoint check
 if [[ ! -d "${MOUNT}" ]] ; then
     die "Not a valid mountpoint directory: '${MOUNT}'"
 fi
 
+# Select backup directory
+BACKUP="${BACKUP:-""}"
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    BACKUP="$(whiptail --title "Backup Directory" \
+        --inputbox "Enter the path to restore a backup from. Leave empty for a fresh install (default). You can also use '/.btrfs/snapshots' to clone the currently running system." \
+        10 60 "${BACKUP}" 3>&1 1>&2 2>&3)" \
+        || abort_exit
+fi
+plain "Using backup directory: '${BACKUP}'."
+
 # Check if backup dir exists if used
 if [[ -n "${BACKUP}" && ! -d "${BACKUP}" ]]; then
     die "Not a valid backup directory: '${BACKUP}'"
 fi
 
+# Install gnome software?
+if [[ -z "${BACKUP}" ]]; then
+    GNOME="${GNOME:-n}"
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        PARAM=""
+        if [[ "${GNOME}" != "y" ]]; then
+            PARAM="--defaultno"
+        fi
+        if whiptail --title "Desktop Environment" \
+                    --yesno "Install Gnome as desktop environemnt?" \
+                    "${PARAM}" 10 60; then
+            GNOME="y"
+        else
+            GNOME="n"
+        fi
+    fi
+    plain "Installing Gnome: '${GNOME}'."
+fi
+
+exit
+
 # Warn when random is used, and recommend to start rngd.service
 if [[ "${RANDOM_SOURCE}" == "random" && "$(systemctl is-active rngd)" != "active" ]]; then
     warning "No rngd serivice running. Creating crypto disks may take a very long time."
+    plain "Run: 'sudo pacman -S rng-tools && sudo systemctl enable --now rngd.service'"
 fi
 
 # User check
@@ -191,7 +337,7 @@ msg2 "1.1 Set the keyboard layout"
 # Boot CD in EFI mode
 msg2 "1.2 Verify the boot mode"
 if [[ ! -d /sys/firmware/efi/efivars ]]; then
-    warning "Not running in EFI mode. The system will not be able to boot with EFI, only legacy BIOS."
+    warning "Not running in EFI mode. The system might not be able to boot with EFI, only legacy BIOS. Make sure to reinitialize the efi variables."
 fi
 
 # Check for internet
@@ -342,8 +488,11 @@ if [[ -z "${BACKUP}" ]]; then
 
     # Determine packages to install
     PACKAGES=("pkg/base.pacman")
-    if [[ -n "${GNOME}" ]]; then
+    if [[ "${GNOME}" == "y" ]]; then
         PACKAGES+=("pkg/gnome.pacman")
+    fi
+    if [[ "${VM}" == "y" ]]; then
+        PACKAGES+=("pkg/vm.pacman")
     fi
 
     # Use local package cache for non livecd installations
@@ -365,7 +514,7 @@ if [[ -z "${BACKUP}" ]]; then
 
     # Set time zone
     msg2 "3.3 Time zone"
-    ln -sf "/usr/share/zoneinfo/${TIMEZONE}" "${MOUNT}"/etc/localtime
+    ln -sf "${TIMEZONE}" "${MOUNT}"/etc/localtime
     arch-chroot "${MOUNT}" /bin/bash -c "hwclock --systohc --utc"
     arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable systemd-timesyncd.service"
 
@@ -382,7 +531,7 @@ if [[ -z "${BACKUP}" ]]; then
     echo "${MY_HOSTNAME}" > "${MOUNT}"/etc/hostname
 
     msg2 "3.6 Network configuration"
-    if [[ -z "${GNOME}" ]]; then
+    if [[ "${GNOME}" != "y" ]]; then
         arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable dhcpcd.service"
         warning "dhcpcd.service enabled. Disable it when using NetworkManager.service instead."
     else
@@ -470,7 +619,3 @@ if [[ "${LUKS}" == "y" ]]; then
     cryptsetup luksClose "${ROOT_DEVICE}"
 fi
 reboot
-
-
-# TODO check all moount options
-# TODO nossd required?
