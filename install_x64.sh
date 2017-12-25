@@ -388,7 +388,7 @@ fi
 msg2 "1.6 Mount the file systems"
 if [[ "${BTRFS}" == "y" ]]; then
     mkfs.btrfs -f "${ROOT_DEVICE}"
-    mount -o nossd "${ROOT_DEVICE}" ${MOUNT}
+    mount -o "${ROOT_DEVICE}" ${MOUNT}
     chmod 700 ${MOUNT}
 
     # Create structure subvolumes
@@ -437,21 +437,21 @@ if [[ "${BTRFS}" == "y" ]]; then
     umount -R ${MOUNT}
 
     # Mount snapper tracked root and home subvolume to the mountpoint
-    mount -o nossd,subvol=subvolumes/root "${ROOT_DEVICE}" ${MOUNT}
+    mount -o subvol=subvolumes/root "${ROOT_DEVICE}" ${MOUNT}
     mkdir -p ${MOUNT}/.snapshots
-    mount -o nossd,subvol=snapshots/root "${ROOT_DEVICE}" ${MOUNT}/.snapshots
+    mount -o subvol=snapshots/root "${ROOT_DEVICE}" ${MOUNT}/.snapshots
     mkdir -p ${MOUNT}/home
-    mount -o nossd,subvol=subvolumes/home "${ROOT_DEVICE}" ${MOUNT}/home
+    mount -o subvol=subvolumes/home "${ROOT_DEVICE}" ${MOUNT}/home
     mkdir -p ${MOUNT}/home/.snapshots
-    mount -o nossd,subvol=snapshots/home "${ROOT_DEVICE}" ${MOUNT}/home/.snapshots
+    mount -o subvol=snapshots/home "${ROOT_DEVICE}" ${MOUNT}/home/.snapshots
     mkdir -p ${MOUNT}/repo
-    mount -o nossd,subvol=subvolumes/repo "${ROOT_DEVICE}" ${MOUNT}/repo
+    mount -o subvol=subvolumes/repo "${ROOT_DEVICE}" ${MOUNT}/repo
     mkdir -p ${MOUNT}/repo/.snapshots
-    mount -o nossd,subvol=snapshots/repo "${ROOT_DEVICE}" ${MOUNT}/repo/.snapshots
+    mount -o subvol=snapshots/repo "${ROOT_DEVICE}" ${MOUNT}/repo/.snapshots
 
     # Mount btrfs real root directory to /.btrfs
     mkdir -p ${MOUNT}/.btrfs
-    mount -o nossd "${ROOT_DEVICE}" ${MOUNT}/.btrfs
+    mount -o "${ROOT_DEVICE}" ${MOUNT}/.btrfs
 
     # Mount subvolumes which should get excluded from snapper backups
     mkdir -p ${MOUNT}/var/cache/pacman/pkg
@@ -459,11 +459,11 @@ if [[ "${BTRFS}" == "y" ]]; then
     mkdir -p ${MOUNT}/var/log
     mkdir -p ${MOUNT}/srv
     mkdir -p ${MOUNT}/data
-    mount -o nossd,subvol=excludes/pkg "${ROOT_DEVICE}" ${MOUNT}/var/cache/pacman/pkg
-    mount -o nossd,subvol=excludes/tmp "${ROOT_DEVICE}" ${MOUNT}/var/tmp
-    mount -o nossd,subvol=excludes/log "${ROOT_DEVICE}" ${MOUNT}/var/log
-    mount -o nossd,subvol=excludes/srv "${ROOT_DEVICE}" ${MOUNT}/srv
-    mount -o nossd,subvol=excludes/data "${ROOT_DEVICE}" ${MOUNT}/data
+    mount -o subvol=excludes/pkg "${ROOT_DEVICE}" ${MOUNT}/var/cache/pacman/pkg
+    mount -o subvol=excludes/tmp "${ROOT_DEVICE}" ${MOUNT}/var/tmp
+    mount -o subvol=excludes/log "${ROOT_DEVICE}" ${MOUNT}/var/log
+    mount -o subvol=excludes/srv "${ROOT_DEVICE}" ${MOUNT}/srv
+    mount -o subvol=excludes/data "${ROOT_DEVICE}" ${MOUNT}/data
 else
     # Create and mount ext4 root
     mkfs.ext4 "${ROOT_DEVICE}"
