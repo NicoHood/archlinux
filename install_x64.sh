@@ -354,7 +354,7 @@ msg2 "1.5 Partition the disks"
 
 # Unmount all existing/pending installations first
 umount -R "${MOUNT}" || true
-cryptsetup luksClose /dev/mapper/$(blkid ${DEVICE}3 -o value -s UUID) || true
+cryptsetup luksClose "/dev/mapper/$(blkid "${DEVICE}3" -o value -s UUID)" || true
 
 # Partition disk:
 # GPT
@@ -367,20 +367,20 @@ echo -e "g\nn\n\n\n+1M\nt\n4\nn\n\n\n+512M\nt\n\n1\nn\n\n\n\np\nw\n" | fdisk "${
 sync
 
 # Make sure that all new partitions do not contain any filesystem signatures anymore
-wipefs -a ${DEVICE}1
-wipefs -a ${DEVICE}2
-wipefs -a ${DEVICE}3
+wipefs -a "${DEVICE}1"
+wipefs -a "${DEVICE}2"
+wipefs -a "${DEVICE}3"
 
 ROOT_DEVICE=${DEVICE}3
 if [[ "${LUKS}" == "y" ]]; then
     # Create cryptodisks
     warning "For more security overwrite the disk with random bytes first."
     plain "Creating and opening root luks container"
-    echo "${PASSWD_ROOT}" | cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 --use-${RANDOM_SOURCE} ${DEVICE}3
+    echo "${PASSWD_ROOT}" | cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 "--use-${RANDOM_SOURCE}" "${DEVICE}3"
 
     # Open cryptodisks
-    LUKS_UUID=$(blkid ${DEVICE}3 -o value -s UUID)
-    echo "${PASSWD_ROOT}" | cryptsetup luksOpen ${DEVICE}3 "${LUKS_UUID}"
+    LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
+    echo "${PASSWD_ROOT}" | cryptsetup luksOpen "${DEVICE}3" "${LUKS_UUID}"
     ROOT_DEVICE="/dev/mapper/${LUKS_UUID}"
 fi
 
@@ -388,92 +388,92 @@ fi
 msg2 "1.6 Mount the file systems"
 if [[ "${BTRFS}" == "y" ]]; then
     mkfs.btrfs -f "${ROOT_DEVICE}"
-    mount -o "${ROOT_DEVICE}" ${MOUNT}
-    chmod 700 ${MOUNT}
+    mount -o "${ROOT_DEVICE}" "${MOUNT}"
+    chmod 700 "${MOUNT}"
 
     # Create structure subvolumes
-    btrfs subvolume create ${MOUNT}/subvolumes
-    btrfs subvolume create ${MOUNT}/snapshots
-    btrfs subvolume create ${MOUNT}/excludes
+    btrfs subvolume create "${MOUNT}/subvolumes"
+    btrfs subvolume create "${MOUNT}/snapshots"
+    btrfs subvolume create "${MOUNT}/excludes"
 
     # Use external backup to install from
     if [[ -n "${BACKUP}" ]]; then
       # Transfer backup snapshots and create read/write snapshots of them
       SRC_DIR="$(find "${BACKUP}"/root/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
-      btrfs send "${SRC_DIR}" | btrfs receive ${MOUNT}/subvolumes/
-      btrfs subvolume snapshot ${MOUNT}/subvolumes/snapshot ${MOUNT}/subvolumes/root
-      btrfs subvolume delete ${MOUNT}/subvolumes/snapshot
+      btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
+      btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/root"
+      btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
 
       SRC_DIR="$(find "${BACKUP}"/home/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
-      btrfs send "${SRC_DIR}" | btrfs receive ${MOUNT}/subvolumes/
-      btrfs subvolume snapshot ${MOUNT}/subvolumes/snapshot ${MOUNT}/subvolumes/home
-      btrfs subvolume delete ${MOUNT}/subvolumes/snapshot
+      btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
+      btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/home"
+      btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
 
       SRC_DIR="$(find "${BACKUP}"/repo/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
-      btrfs send "${SRC_DIR}" | btrfs receive ${MOUNT}/subvolumes/
-      btrfs subvolume snapshot ${MOUNT}/subvolumes/snapshot ${MOUNT}/subvolumes/repo
-      btrfs subvolume delete ${MOUNT}/subvolumes/snapshot
+      btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
+      btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/repo"
+      btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
     else
       # Create top level subvolumes
-      btrfs subvolume create ${MOUNT}/subvolumes/root
-      btrfs subvolume create ${MOUNT}/subvolumes/home
-      btrfs subvolume create ${MOUNT}/subvolumes/repo
+      btrfs subvolume create "${MOUNT}/subvolumes/root"
+      btrfs subvolume create "${MOUNT}/subvolumes/home"
+      btrfs subvolume create "${MOUNT}/subvolumes/repo"
     fi
 
     # Create subvolumes for snapshots
-    btrfs subvolume create ${MOUNT}/snapshots/root
-    btrfs subvolume create ${MOUNT}/snapshots/home
-    btrfs subvolume create ${MOUNT}/snapshots/repo
+    btrfs subvolume create "${MOUNT}/snapshots/root"
+    btrfs subvolume create "${MOUNT}/snapshots/home"
+    btrfs subvolume create "${MOUNT}/snapshots/repo"
 
     # Create subvolumes untracked by snapper
-    btrfs subvolume create ${MOUNT}/excludes/pkg
-    btrfs subvolume create ${MOUNT}/excludes/tmp
-    chmod +t ${MOUNT}/excludes/tmp
-    btrfs subvolume create ${MOUNT}/excludes/log
-    btrfs subvolume create ${MOUNT}/excludes/srv
-    btrfs subvolume create ${MOUNT}/excludes/data
+    btrfs subvolume create "${MOUNT}/excludes/pkg"
+    btrfs subvolume create "${MOUNT}/excludes/tmp"
+    chmod +t "${MOUNT}/excludes/tmp"
+    btrfs subvolume create "${MOUNT}/excludes/log"
+    btrfs subvolume create "${MOUNT}/excludes/srv"
+    btrfs subvolume create "${MOUNT}/excludes/data"
 
     # Unmount btrfs filesystem
-    umount -R ${MOUNT}
+    umount -R "${MOUNT}"
 
     # Mount snapper tracked root and home subvolume to the mountpoint
-    mount -o subvol=subvolumes/root "${ROOT_DEVICE}" ${MOUNT}
-    mkdir -p ${MOUNT}/.snapshots
-    mount -o subvol=snapshots/root "${ROOT_DEVICE}" ${MOUNT}/.snapshots
-    mkdir -p ${MOUNT}/home
-    mount -o subvol=subvolumes/home "${ROOT_DEVICE}" ${MOUNT}/home
-    mkdir -p ${MOUNT}/home/.snapshots
-    mount -o subvol=snapshots/home "${ROOT_DEVICE}" ${MOUNT}/home/.snapshots
-    mkdir -p ${MOUNT}/repo
-    mount -o subvol=subvolumes/repo "${ROOT_DEVICE}" ${MOUNT}/repo
-    mkdir -p ${MOUNT}/repo/.snapshots
-    mount -o subvol=snapshots/repo "${ROOT_DEVICE}" ${MOUNT}/repo/.snapshots
+    mount -o subvol=subvolumes/root "${ROOT_DEVICE}" "${MOUNT}"
+    mkdir -p "${MOUNT}/.snapshots"
+    mount -o subvol=snapshots/root "${ROOT_DEVICE}" "${MOUNT}/.snapshots"
+    mkdir -p "${MOUNT}/home"
+    mount -o subvol=subvolumes/home "${ROOT_DEVICE}" "${MOUNT}/home"
+    mkdir -p "${MOUNT}/home/.snapshots"
+    mount -o subvol=snapshots/home "${ROOT_DEVICE}" "${MOUNT}/home/.snapshots"
+    mkdir -p "${MOUNT}/repo"
+    mount -o subvol=subvolumes/repo "${ROOT_DEVICE}" "${MOUNT}/repo"
+    mkdir -p "${MOUNT}/repo/.snapshots"
+    mount -o subvol=snapshots/repo "${ROOT_DEVICE}" "${MOUNT}/repo/.snapshots"
 
     # Mount btrfs real root directory to /.btrfs
-    mkdir -p ${MOUNT}/.btrfs
-    mount -o "${ROOT_DEVICE}" ${MOUNT}/.btrfs
+    mkdir -p "${MOUNT}/.btrfs"
+    mount -o "${ROOT_DEVICE}" "${MOUNT}/.btrfs"
 
     # Mount subvolumes which should get excluded from snapper backups
-    mkdir -p ${MOUNT}/var/cache/pacman/pkg
-    mkdir -p ${MOUNT}/var/tmp
-    mkdir -p ${MOUNT}/var/log
-    mkdir -p ${MOUNT}/srv
-    mkdir -p ${MOUNT}/data
-    mount -o subvol=excludes/pkg "${ROOT_DEVICE}" ${MOUNT}/var/cache/pacman/pkg
-    mount -o subvol=excludes/tmp "${ROOT_DEVICE}" ${MOUNT}/var/tmp
-    mount -o subvol=excludes/log "${ROOT_DEVICE}" ${MOUNT}/var/log
-    mount -o subvol=excludes/srv "${ROOT_DEVICE}" ${MOUNT}/srv
-    mount -o subvol=excludes/data "${ROOT_DEVICE}" ${MOUNT}/data
+    mkdir -p "${MOUNT}/var/cache/pacman/pkg"
+    mkdir -p "${MOUNT}/var/tmp"
+    mkdir -p "${MOUNT}/var/log"
+    mkdir -p "${MOUNT}/srv"
+    mkdir -p "${MOUNT}/data"
+    mount -o subvol=excludes/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg"
+    mount -o subvol=excludes/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp"
+    mount -o subvol=excludes/log "${ROOT_DEVICE}" "${MOUNT}/var/log"
+    mount -o subvol=excludes/srv "${ROOT_DEVICE}" "${MOUNT}/srv"
+    mount -o subvol=excludes/data "${ROOT_DEVICE}" "${MOUNT}/data"
 else
     # Create and mount ext4 root
     mkfs.ext4 "${ROOT_DEVICE}"
-    mount "${ROOT_DEVICE}" ${MOUNT}
+    mount "${ROOT_DEVICE}" "${MOUNT}"
 fi
 
 # Format and mount efi partition
-mkfs.fat -F32 ${DEVICE}2
+mkfs.fat -F32 "${DEVICE}2"
 mkdir -p "${MOUNT}/boot/efi"
-mount ${DEVICE}2 "${MOUNT}/boot/efi"
+mount "${DEVICE}2" "${MOUNT}/boot/efi"
 
 if [[ -z "${BACKUP}" ]]; then
     msg "2 Installation"
@@ -536,7 +536,7 @@ if [[ -z "${BACKUP}" ]]; then
         warning "dhcpcd.service enabled. Disable it when using NetworkManager.service instead."
     else
         # Enable gnome network and other services
-        while read line; do
+        while read -r line; do
             arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable ${line}"
         done < pkg/gnome.systemd
     fi
@@ -548,11 +548,11 @@ msg2 "3.7 Initramfs"
 if [[ "${LUKS}" == "y" ]]; then
     # Create and add crypto keyfile for faster initramfs unlocking
     if [[ -z "${BACKUP}" ]]; then
-        dd bs=512 count=4 if=/dev/${RANDOM_SOURCE} of=${MOUNT}/root/crypto_keyfile.bin iflag=fullblock
+        dd bs=512 count=4 if="/dev/${RANDOM_SOURCE}" of="${MOUNT}/root/crypto_keyfile.bin" iflag=fullblock
         sync
 
         # Forbit to read initramfs to not get access to embedded crypto keys
-        chmod 000 ${MOUNT}/root/crypto_keyfile.bin
+        chmod 000 "${MOUNT}/root/crypto_keyfile.bin"
         chmod 700 "${MOUNT}"/boot/initramfs-linux*
 
         # Add "keymap, encrypt" hooks and "/usr/bin/btrfs" to binaries
@@ -560,7 +560,7 @@ if [[ "${LUKS}" == "y" ]]; then
         sed -i "s#^FILES=(#\0/root/crypto_keyfile.bin#g" "${MOUNT}"/etc/mkinitcpio.conf
     fi
 
-    echo "${PASSWD_ROOT}" | cryptsetup luksAddKey ${DEVICE}3 ${MOUNT}/root/crypto_keyfile.bin
+    echo "${PASSWD_ROOT}" | cryptsetup luksAddKey "${DEVICE}3" "${MOUNT}/root/crypto_keyfile.bin"
 fi
 if [[ "${BTRFS}" == "y" && -z "${BACKUP}" ]]; then
     sed -i "s#^BINARIES=(#\0/usr/bin/btrfs#g" "${MOUNT}"/etc/mkinitcpio.conf
@@ -579,8 +579,8 @@ if [[ -z "${BACKUP}" ]]; then
     arch-chroot "${MOUNT}" /bin/bash -c "passwd -l root"
 
     # Create user folders for /data/$USER and /repo/$USER
-    arch-chroot "${MOUNT}" /bin/bash -c "install -d -o "${MY_USERNAME,,}" -g "${MY_USERNAME,,}" -m 700 "/data/${MY_USERNAME,,}""
-    arch-chroot "${MOUNT}" /bin/bash -c "install -d -o "${MY_USERNAME,,}" -g "${MY_USERNAME,,}" -m 700 "/repo/${MY_USERNAME,,}""
+    arch-chroot "${MOUNT}" /bin/bash -c "install -d -o ${MY_USERNAME,,} -g ${MY_USERNAME,,} -m 700 /data/${MY_USERNAME,,}"
+    arch-chroot "${MOUNT}" /bin/bash -c "install -d -o ${MY_USERNAME,,} -g ${MY_USERNAME,,} -m 700 /repo/${MY_USERNAME,,}"
 fi
 
 # Install grub for efi and bios. Efi installation will only work if you booted with efi.
