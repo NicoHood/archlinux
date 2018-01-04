@@ -386,7 +386,8 @@ fi
 msg2 "1.6 Mount the file systems"
 if [[ "${BTRFS}" == "y" ]]; then
     mkfs.btrfs -f "${ROOT_DEVICE}"
-    mount -o "${ROOT_DEVICE}" "${MOUNT}"
+    sync
+    mount "${ROOT_DEVICE}" "${MOUNT}"
     chmod 700 "${MOUNT}"
 
     # Create structure subvolumes
@@ -449,7 +450,7 @@ if [[ "${BTRFS}" == "y" ]]; then
 
     # Mount btrfs real root directory to /.btrfs
     mkdir -p "${MOUNT}/.btrfs"
-    mount -o "${ROOT_DEVICE}" "${MOUNT}/.btrfs"
+    mount "${ROOT_DEVICE}" "${MOUNT}/.btrfs"
 
     # Mount subvolumes which should get excluded from snapper backups
     mkdir -p "${MOUNT}/var/cache/pacman/pkg"
@@ -465,11 +466,13 @@ if [[ "${BTRFS}" == "y" ]]; then
 else
     # Create and mount ext4 root
     mkfs.ext4 "${ROOT_DEVICE}"
+    sync
     mount "${ROOT_DEVICE}" "${MOUNT}"
 fi
 
 # Format and mount efi partition
 mkfs.fat -F32 "${DEVICE}2"
+sync
 mkdir -p "${MOUNT}/boot/efi"
 mount "${DEVICE}2" "${MOUNT}/boot/efi"
 
