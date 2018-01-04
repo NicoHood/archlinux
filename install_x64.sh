@@ -553,8 +553,9 @@ if [[ "${LUKS}" == "y" ]]; then
         sync
 
         # Forbit to read initramfs to not get access to embedded crypto keys
+        warning "Setting initramfs permissions to 600. Make sure to also change permissions for your own installed kernels."
         chmod 000 "${MOUNT}/root/crypto_keyfile.bin"
-        chmod 700 "${MOUNT}"/boot/initramfs-linux*
+        chmod 600 "${MOUNT}"/boot/initramfs-linux*
 
         # Add "keymap, encrypt" hooks and "/usr/bin/btrfs" to binaries
         sed -i 's/^HOOKS=(.*block/\0 keymap encrypt/g' "${MOUNT}"/etc/mkinitcpio.conf
