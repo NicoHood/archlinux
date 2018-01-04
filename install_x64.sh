@@ -397,26 +397,26 @@ if [[ "${BTRFS}" == "y" ]]; then
 
     # Use external backup to install from
     if [[ -n "${BACKUP}" ]]; then
-      # Transfer backup snapshots and create read/write snapshots of them
-      SRC_DIR="$(find "${BACKUP}"/root/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
-      btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
-      btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/root"
-      btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
+        # Transfer backup snapshots and create read/write snapshots of them
+        SRC_DIR="$(find "${BACKUP}"/root/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
+        btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
+        btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/root"
+        btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
 
-      SRC_DIR="$(find "${BACKUP}"/home/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
-      btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
-      btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/home"
-      btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
+        SRC_DIR="$(find "${BACKUP}"/home/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
+        btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
+        btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/home"
+        btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
 
-      SRC_DIR="$(find "${BACKUP}"/repo/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
-      btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
-      btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/repo"
-      btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
+        SRC_DIR="$(find "${BACKUP}"/repo/ -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
+        btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
+        btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/repo"
+        btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
     else
-      # Create top level subvolumes
-      btrfs subvolume create "${MOUNT}/subvolumes/root"
-      btrfs subvolume create "${MOUNT}/subvolumes/home"
-      btrfs subvolume create "${MOUNT}/subvolumes/repo"
+        # Create top level subvolumes
+        btrfs subvolume create "${MOUNT}/subvolumes/root"
+        btrfs subvolume create "${MOUNT}/subvolumes/home"
+        btrfs subvolume create "${MOUNT}/subvolumes/repo"
     fi
 
     # Create subvolumes for snapshots
