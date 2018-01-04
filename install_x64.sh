@@ -132,111 +132,132 @@ if [[ "${INTERACTIVE}" == "y" ]]; then
     check_dependency whiptail
 fi
 
-# Select preset for vm or real desktop machine
-if [[ "${INTERACTIVE}" != "y" ]] || ! whiptail --title "Preset Selection" \
-            --yesno "Use preset for virtual machine?" \
-            --defaultno 10 60; then
-    # Normal installation
-    MY_USERNAME="${MY_USERNAME:-"${SUDO_USER}"}"
-    MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
+# Select backup directory
+BACKUP="${BACKUP:-""}"
+if [[ "${INTERACTIVE}" == "y" ]]; then
+    BACKUP="$(whiptail --title "Backup Directory" \
+        --inputbox "Enter the path to restore a backup from. Leave empty for a fresh install (default). You can also use '/.btrfs/snapshots' to clone the currently running system." \
+        10 60 "${BACKUP}" 3>&1 1>&2 2>&3)" \
+        || abort_exit
+fi
+plain "Using backup directory: '${BACKUP}'."
+
+# Check if backup dir exists if used
+if [[ -n "${BACKUP}" && ! -d "${BACKUP}" ]]; then
+    die "Not a valid backup directory: '${BACKUP}'"
+fi
+
+# Most settings are already configured when restoring a backup. Skip those.
+if [[ -n "${BACKUP}" ]]; then
     RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
-    BTRFS="${BTRFS:-y}"
-    LUKS="${LUKS:-y}"
-    VM="${VM:-n}"
+    BTRFS="y"
 else
-    # VM installation
-    MY_USERNAME="${MY_USERNAME:-arch}"
-    MY_HOSTNAME="${MY_HOSTNAME:-archlinuxvm}"
-    RANDOM_SOURCE="${RANDOM_SOURCE:-urandom}"
-    BTRFS="${BTRFS:-y}"
-    LUKS="${LUKS:-n}"
-    VM="${VM:-y}"
-fi
-
-# Select keyboard layout
-KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf)"}"
-if [[ "${INTERACTIVE}" == "y" ]]; then
-    KEYBOARD_LAYOUT="$(whiptail --title "Keyboard Layout" \
-        --inputbox "Please enter your desired keyboard layout.\n
-List all available layouts with 'localectl list-keymaps'." \
-        10 60 "${KEYBOARD_LAYOUT}" 3>&1 1>&2 2>&3)" \
-        || abort_exit
-fi
-plain "Using keyboard layout: '${KEYBOARD_LAYOUT}'."
-
-# Check keyboard layout
-if ! grep -Fxq "${KEYBOARD_LAYOUT}" <(localectl list-keymaps); then
-    die "Invalid keyboard layout: ${KEYBOARD_LAYOUT}"
-fi
-
-# Select timezone
-TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
-if [[ "${INTERACTIVE}" == "y" ]]; then
-    if whiptail --title "Timezone" \
-                --yesno "Change timezone? Current setting: '${TIMEZONE}'" \
+    # Select preset for vm or real desktop machine
+    if [[ "${INTERACTIVE}" != "y" ]] || ! whiptail --title "Preset Selection" \
+                --yesno "Use preset for virtual machine?" \
                 --defaultno 10 60; then
-        TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
-    fi
-fi
-plain "Using timezone: '${TIMEZONE}'."
-
-# Check timezone
-if [[ ! -f "${TIMEZONE}" ]]; then
-    die "Invalid timezone."
-fi
-
-# Select hostname
-if [[ "${INTERACTIVE}" == "y" ]]; then
-    MY_HOSTNAME="$(whiptail --title "Hostname" \
-        --inputbox "Please enter your desired hostname." \
-        10 60 "${MY_HOSTNAME}" 3>&1 1>&2 2>&3)" \
-        || abort_exit
-fi
-plain "Using hostname: '${MY_HOSTNAME}'."
-
-# Check hostname
-if [[ -z "${MY_HOSTNAME}" ]]; then
-    die "Empty hostname."
-fi
-
-# Select username
-if [[ "${INTERACTIVE}" == "y" ]]; then
-    MY_USERNAME="$(whiptail --title "Username" \
-        --inputbox "Please enter your desired username." \
-        10 60 "${MY_USERNAME}" 3>&1 1>&2 2>&3)" \
-        || abort_exit
-fi
-plain "Using username: '${MY_USERNAME}'."
-
-# Check hostname
-if [[ -z "${MY_USERNAME}" ]]; then
-    die "Empty username."
-fi
-
-# Select user password
-PASSWD_USER="${PASSWD_USER:-toor}"
-if [[ "${INTERACTIVE}" == "y" ]]; then
-    PASSWD_USER="$(whiptail --title "User Password" \
-        --passwordbox "Please enter your desired user password (default: toor)." \
-         10 60 "${PASSWD_USER}" 3>&1 1>&2 2>&3)" \
-         || abort_exit
-fi
-
-# Select filesystem: Btrfs/Ext4
-if [[ "${INTERACTIVE}" == "y" ]]; then
-    PARAM=""
-    if [[ "${BTRFS}" != "y" ]]; then
-        PARAM="--defaultno"
-    fi
-    if whiptail --title "Filesystem Selection" \
-                --yesno "Use Btrfs as filesystem (ext4 as alternative)?" \
-                "${PARAM}" 10 60; then
-        BTRFS="y"
+        # Normal installation
+        MY_USERNAME="${MY_USERNAME:-"${SUDO_USER}"}"
+        MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
+        RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
+        BTRFS="${BTRFS:-y}"
+        LUKS="${LUKS:-y}"
+        VM="${VM:-n}"
     else
-        BTRFS="n"
+        # VM installation
+        MY_USERNAME="${MY_USERNAME:-arch}"
+        MY_HOSTNAME="${MY_HOSTNAME:-archlinuxvm}"
+        RANDOM_SOURCE="${RANDOM_SOURCE:-urandom}"
+        BTRFS="${BTRFS:-y}"
+        LUKS="${LUKS:-n}"
+        VM="${VM:-y}"
     fi
+
+    # Select keyboard layout
+    KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf)"}"
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        KEYBOARD_LAYOUT="$(whiptail --title "Keyboard Layout" \
+            --inputbox "Please enter your desired keyboard layout.\n
+    List all available layouts with 'localectl list-keymaps'." \
+            10 60 "${KEYBOARD_LAYOUT}" 3>&1 1>&2 2>&3)" \
+            || abort_exit
+    fi
+    plain "Using keyboard layout: '${KEYBOARD_LAYOUT}'."
+
+    # Check keyboard layout
+    if ! grep -Fxq "${KEYBOARD_LAYOUT}" <(localectl list-keymaps); then
+        die "Invalid keyboard layout: ${KEYBOARD_LAYOUT}"
+    fi
+
+    # Select timezone
+    TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        if whiptail --title "Timezone" \
+                    --yesno "Change timezone? Current setting: '${TIMEZONE}'" \
+                    --defaultno 10 60; then
+            TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
+        fi
+    fi
+    plain "Using timezone: '${TIMEZONE}'."
+
+    # Check timezone
+    if [[ ! -f "${TIMEZONE}" ]]; then
+        die "Invalid timezone."
+    fi
+
+    # Select hostname
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        MY_HOSTNAME="$(whiptail --title "Hostname" \
+            --inputbox "Please enter your desired hostname." \
+            10 60 "${MY_HOSTNAME}" 3>&1 1>&2 2>&3)" \
+            || abort_exit
+    fi
+    plain "Using hostname: '${MY_HOSTNAME}'."
+
+    # Check hostname
+    if [[ -z "${MY_HOSTNAME}" ]]; then
+        die "Empty hostname."
+    fi
+
+    # Select username
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        MY_USERNAME="$(whiptail --title "Username" \
+            --inputbox "Please enter your desired username." \
+            10 60 "${MY_USERNAME}" 3>&1 1>&2 2>&3)" \
+            || abort_exit
+    fi
+    plain "Using username: '${MY_USERNAME}'."
+
+    # Check username
+    if [[ -z "${MY_USERNAME}" ]]; then
+        die "Empty username."
+    fi
+
+    # Select user password
+    PASSWD_USER="${PASSWD_USER:-toor}"
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        PASSWD_USER="$(whiptail --title "User Password" \
+            --passwordbox "Please enter your desired user password (default: toor)." \
+             10 60 "${PASSWD_USER}" 3>&1 1>&2 2>&3)" \
+             || abort_exit
+    fi
+
+    # Select filesystem: Btrfs/Ext4
+    if [[ "${INTERACTIVE}" == "y" ]]; then
+        PARAM=""
+        if [[ "${BTRFS}" != "y" ]]; then
+            PARAM="--defaultno"
+        fi
+        if whiptail --title "Filesystem Selection" \
+                    --yesno "Use Btrfs as filesystem (ext4 as alternative)?" \
+                    "${PARAM}" 10 60; then
+            BTRFS="y"
+        else
+            BTRFS="n"
+        fi
+    fi
+    plain "Using Btrfs: ${BTRFS}."
 fi
-plain "Using Btrfs: ${BTRFS}."
 
 # Enable luks encryption
 if [[ "${INTERACTIVE}" == "y" ]]; then
@@ -278,21 +299,6 @@ plain "Using mountpoint: '${MOUNT}'."
 # Mountpoint check
 if [[ ! -d "${MOUNT}" ]] ; then
     die "Not a valid mountpoint directory: '${MOUNT}'"
-fi
-
-# Select backup directory
-BACKUP="${BACKUP:-""}"
-if [[ "${INTERACTIVE}" == "y" ]]; then
-    BACKUP="$(whiptail --title "Backup Directory" \
-        --inputbox "Enter the path to restore a backup from. Leave empty for a fresh install (default). You can also use '/.btrfs/snapshots' to clone the currently running system." \
-        10 60 "${BACKUP}" 3>&1 1>&2 2>&3)" \
-        || abort_exit
-fi
-plain "Using backup directory: '${BACKUP}'."
-
-# Check if backup dir exists if used
-if [[ -n "${BACKUP}" && ! -d "${BACKUP}" ]]; then
-    die "Not a valid backup directory: '${BACKUP}'"
 fi
 
 # Install gnome software?
