@@ -369,7 +369,7 @@ wipefs -a "${DEVICE}1"
 wipefs -a "${DEVICE}2"
 wipefs -a "${DEVICE}3"
 
-ROOT_DEVICE=${DEVICE}3
+ROOT_DEVICE="${DEVICE}3"
 if [[ "${LUKS}" == "y" ]]; then
     # Create cryptodisks
     warning "For more security overwrite the disk with random bytes first."
