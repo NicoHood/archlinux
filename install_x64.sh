@@ -314,8 +314,6 @@ if [[ -z "${BACKUP}" ]]; then
     plain "Installing Gnome: '${GNOME}'."
 fi
 
-exit
-
 # Warn when random is used, and recommend to start rngd.service
 if [[ "${RANDOM_SOURCE}" == "random" && "$(systemctl is-active rngd)" != "active" ]]; then
     warning "No rngd serivice running. Creating crypto disks may take a very long time."
