@@ -609,8 +609,7 @@ sync
 plain "Installation successful. System still mounted at ${MOUNT}. Unmount and reboot now? [Y/n]"
 read -r yesno
 if [[ "${yesno}" != [Yy]"es" && "${yesno}" != [Yy] && -n "${yesno}" ]]; then
-    warning "Aborted by user"
-    exit 0
+    abort_exit
 fi
 
 # Unmount and reboot
