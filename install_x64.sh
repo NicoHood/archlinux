@@ -174,7 +174,7 @@ else
     fi
 
     # Select keyboard layout
-    KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf)"}"
+    KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf || echo us)"}"
     if [[ "${INTERACTIVE}" == "y" ]]; then
         KEYBOARD_LAYOUT="$(whiptail --title "Keyboard Layout" \
             --inputbox "Please enter your desired keyboard layout.\n
@@ -185,9 +185,10 @@ else
     plain "Using keyboard layout: '${KEYBOARD_LAYOUT}'."
 
     # Check keyboard layout
-    if ! grep -Fxq "${KEYBOARD_LAYOUT}" <(localectl list-keymaps); then
-        die "Invalid keyboard layout: ${KEYBOARD_LAYOUT}"
-    fi
+    # TODO this fails on the live cd: https://github.com/systemd/systemd/issues/2602#issuecomment-355356852
+    # if ! grep -Fxq "${KEYBOARD_LAYOUT}" <(localectl list-keymaps); then
+    #     die "Invalid keyboard layout: ${KEYBOARD_LAYOUT}"
+    # fi
 
     # Select timezone
     TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
