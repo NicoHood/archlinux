@@ -14,9 +14,11 @@ xorg-xrandr
 
 gdm
 gnome-keyring
+libsecret
 gnome-session
 gnome-settings-daemon
 gnome-shell
+vino
 gvfs
 mutter
 sushi
@@ -38,6 +40,8 @@ adwaita-icon-theme
 
 gnome-terminal
 nautilus
+gvfs-smb
+file-roller
 gnome-screenshot
 eog
 evince
