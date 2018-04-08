@@ -26,14 +26,14 @@ xdg-user-dirs-gtk
 plank
 
 gnome-control-center
-gnome-tweak-tool
+gnome-tweaks
 dconf-editor
 mousetweaks
 gnome-shell-extensions
 
 gnome-backgrounds
 arc-gtk-theme
-gnome-themes-standard
+gnome-themes-extra
 arc-icon-theme
 elementary-icon-theme
 adwaita-icon-theme
@@ -49,6 +49,7 @@ gnome-calculator
 gnome-disk-utility
 gnome-system-monitor
 simple-scan
+firefox
 
 pulseaudio
 paprefs
@@ -59,7 +60,6 @@ pulseaudio-bluetooth
 
 cups
 gutenprint
-gtk3-print-backends
 system-config-printer
 
 avahi
