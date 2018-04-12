@@ -10,6 +10,7 @@ install:
 	install -Dm755 bin/nicohood.mkfs.sh $(DESTDIR)$(BINDIR)/nicohood.mkfs.sh
 	install -Dm755 bin/nicohood.mount.sh $(DESTDIR)$(BINDIR)/nicohood.mount.sh
 	install -Dm755 bin/nicohood.install.sh $(DESTDIR)$(BINDIR)/nicohood.install.sh
+	install -Dm755 bin/common.sh $(DESTDIR)$(BINDIR)/common.sh
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	ln -s $(BINDIR)/nicohood.mkfs.sh $(DESTDIR)$(PREFIX)/bin/nicohood.mkfs
 	ln -s $(BINDIR)/nicohood.mount.sh $(DESTDIR)$(PREFIX)/bin/nicohood.mount
