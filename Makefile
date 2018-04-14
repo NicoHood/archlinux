@@ -23,4 +23,5 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.mkfs
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.mount
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.install
+	rm -f $(DESTDIR)$(BINDIR)/common.sh
 	rm -f $(DESTDIR)$(PREFIX)/share/doc/nicohood/Readme.md

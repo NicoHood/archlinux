@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Import util functions, will print a welcome message
+[[ ! -f common.sh ]] && echo "Util script not found." && exit 1
 source common.sh
 
 # Check input parameters
