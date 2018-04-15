@@ -42,21 +42,21 @@ done < <(find "${BACKUP}/custom" -maxdepth 1 -mindepth 1 -type d -printf '%f\0')
 msg2 "Partition the disks"
 PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLUMES[@]}"
 
-# Create temporary mountpoint and mount bare btrfs filesystem
+# Create temporary mountpoint and mount btrfs filesystem
 msg2 "Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
-mount "${DEVICE}3" "${MOUNT}"
+PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 
 function copy_subvolume()
 {
     config="${1}"
     SRC_DIR="$(find "${BACKUP}/${config}/" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
     msg2 "Transfering snapshot '${SRC_DIR}'..."
-    btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
-    btrfs subvolume delete "${MOUNT}/subvolumes/${config}"
-    btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/${config}"
-    btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
+    btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/.btrfs/subvolumes/"
+    btrfs subvolume delete "${MOUNT}/.btrfs/subvolumes/${config}"
+    btrfs subvolume snapshot "${MOUNT}/.btrfs/subvolumes/snapshot" "${MOUNT}/.btrfs/subvolumes/${config}"
+    btrfs subvolume delete "${MOUNT}/.btrfs/subvolumes/snapshot"
 }
 
 # Copy subvolumes to destination
@@ -70,6 +70,10 @@ done
 
 # Remount with real filesystem mapping
 umount -R "${MOUNT}"
+if [[ "${LUKS}" == "y" ]]; then
+    LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
+    cryptsetup luksClose "${LUKS_UUID}"
+fi
 PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 
 # Backup and regenerate fstab
@@ -78,7 +82,6 @@ genfstab -U "${MOUNT}" > "${MOUNT}"/etc/fstab
 
 # Install Grub for Efi and BIOS. Efi installation will only work if you booted with efi.
 if [[ "${LUKS}" == "y" ]]; then
-    LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
     cp "${MOUNT}/etc/default/grub" "${MOUNT}/etc/default/grub.bak"
     sed -i "s#cryptdevice=UUID=.*:cryptroot#cryptdevice=UUID=${LUKS_UUID}:cryptroot#" \
         "${MOUNT}/etc/default/grub"
