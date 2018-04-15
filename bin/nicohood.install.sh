@@ -25,8 +25,8 @@ SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 MY_USERNAME="${MY_USERNAME:-"${SUDO_USER:-arch}"}"
 PASSWD_USER="${PASSWD_USER:-toor}"
 MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
-export PASSWD_ROOT="${PASSWD_ROOT:-root}"
-export LUKS="${LUKS:-y}"
+PASSWD_ROOT="${PASSWD_ROOT:-root}"
+LUKS="${LUKS:-y}"
 GNOME="${GNOME:-y}"
 KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf &>/dev/null || echo us)"}"
 if [ -f ~/install.txt ]; then
@@ -60,13 +60,13 @@ fi
 
 # Create filesystems
 msg2 "1.5 Partition the disks"
-nicohood.mkfs "${DEVICE}" "${SUBVOLUMES[@]}"
+PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLUMES[@]}"
 
 # Create temporary mountpoint
 msg2 "1.6 Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
-nicohood.mount "${DEVICE}" "${MOUNT}"
+PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mount "${DEVICE}" "${MOUNT}"
 
 msg "2 Installation"
 
