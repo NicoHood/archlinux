@@ -46,7 +46,7 @@ PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLU
 msg2 "Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
-mount "${DEVICE}" "${MOUNT}"
+mount "${DEVICE}3" "${MOUNT}"
 
 function copy_subvolume()
 {
