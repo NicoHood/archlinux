@@ -105,3 +105,6 @@ install -Dm 755 "${MOUNT}/boot/efi/EFI/grub/grubx64.efi" "${MOUNT}/boot/efi/EFI/
 
 # Generate initramfs
 arch-chroot "${MOUNT}" /bin/bash -c "mkinitcpio -P"
+sync
+
+msg "Restore completed."
