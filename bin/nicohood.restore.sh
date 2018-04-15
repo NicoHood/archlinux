@@ -13,7 +13,6 @@ fi
 
 # Get parameters
 DEVICE="${1}"
-shift
 BACKUP="${2}"
 
 # Check user, device and mountpoint

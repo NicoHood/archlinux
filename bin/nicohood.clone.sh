@@ -18,4 +18,4 @@ DEVICE="${1}"
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
 [[ ! -b "${DEVICE}" ]] && die "Not a valid device: '${DEVICE}'"
 
-nicohood.clone "${DEVICE}" "/.btrfs/snapshots"
+nicohood.restore "${DEVICE}" "/.btrfs/snapshots"
