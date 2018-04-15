@@ -7,7 +7,7 @@ source common.sh
 # Check input parameters
 if [[ "$#" -lt 1 || "$1" == "--help" || "$1" == "-h" ]]; then
     echo "Usage: $(basename "$0") <device> [subvolumes]"
-    echo "Default subvolumes: ${DEFAULT_SUBVOLUMES}"
+    echo "Default subvolumes: ${DEFAULT_SUBVOLUMES[@]}"
     exit 0
 fi
 echo ""
