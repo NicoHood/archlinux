@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # Import util functions, will print a welcome message
-echo "${BASH_SOURCE%/*}/nicohood.common"
 [[ ! -f "${BASH_SOURCE%/*}/nicohood.common" ]] && echo "nicohood.common script not found." && exit 1
 source "${BASH_SOURCE%/*}/nicohood.common"
 
