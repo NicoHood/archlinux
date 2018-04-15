@@ -39,7 +39,6 @@ plain "Using luks disk encryption: ${LUKS}."
 
 # Let luks ask for the password if not passed to the script
 PASSWD_ROOT="${PASSWD_ROOT:-""}"
-RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
 
 # Partition disk:
 # GPT
@@ -59,7 +58,7 @@ wipefs -a "${DEVICE}3"
 ROOT_DEVICE="${DEVICE}3"
 if [[ "${LUKS}" == "y" ]]; then
     # Warn when random is used, and recommend to start rngd.service
-    if [[ "${RANDOM_SOURCE}" == "random" && "$(systemctl is-active rngd)" != "active" ]]; then
+    if [[ "$(systemctl is-active rngd)" != "active" ]]; then
         warning "No rngd service running. Creating crypto disks may take a very long time."
         plain "Run: 'sudo pacman -S rng-tools && sudo systemctl enable --now rngd.service'"
     fi
@@ -68,12 +67,12 @@ if [[ "${LUKS}" == "y" ]]; then
     warning "For better security overwrite the disk with random bytes first."
     plain "Creating and opening root luks container"
     if [[ -z "${PASSWD_ROOT}" ]]; then
-        until cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 "--use-${RANDOM_SOURCE}" "${DEVICE}3"
+        until cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
         do
             error "Please enter a correct Luks password."
         done
     else
-        echo "${PASSWD_ROOT}" | cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 "--use-${RANDOM_SOURCE}" "${DEVICE}3"
+        echo "${PASSWD_ROOT}" | cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
     fi
 
     # Open cryptodisks
@@ -134,7 +133,7 @@ btrfs subvolume create "${MOUNT}/excludes/luks"
 
 # Add luks key to luks directory
 if [[ "${LUKS}" == "y" ]]; then
-    dd bs=512 count=4 iflag=fullblock if="/dev/${RANDOM_SOURCE}" of="${MOUNT}/excludes/luks/crypto_keyfile.bin"
+    dd bs=512 count=4 iflag=fullblock if=/dev/random of="${MOUNT}/excludes/luks/crypto_keyfile.bin"
     sync
     chmod 000 "${MOUNT}/excludes/luks/crypto_keyfile.bin"
     if [[ -z "${PASSWD_ROOT}" ]]; then

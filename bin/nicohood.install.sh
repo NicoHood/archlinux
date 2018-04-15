@@ -25,7 +25,6 @@ SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 MY_USERNAME="${MY_USERNAME:-"${SUDO_USER:-arch}"}"
 PASSWD_USER="${PASSWD_USER:-toor}"
 MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
-export RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
 export PASSWD_ROOT="${PASSWD_ROOT:-root}"
 export LUKS="${LUKS:-y}"
 VM="${VM:-n}"
