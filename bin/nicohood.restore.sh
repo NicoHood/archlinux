@@ -38,18 +38,15 @@ do
     SUBVOLUMES+=("${subvolume}")
 done < <(find "${BACKUP}/custom" -maxdepth 1 -mindepth 1 -type d -printf '%f\0')
 
-# TODO remove
-echo "subvolumes: ${SUBVOLUMES[@]}"
-
 # Create filesystems
 msg2 "Partition the disks"
 PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLUMES[@]}"
 
-# Create temporary mountpoint
+# Create temporary mountpoint and mount bare btrfs filesystem
 msg2 "Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
-PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
+mount "${DEVICE}" "${MOUNT}"
 
 function copy_subvolume()
 {
@@ -70,6 +67,10 @@ for config in "${SUBVOLUMES[@]}"
 do
     copy_subvolume "custom/${config}"
 done
+
+# Remount with real filesystem mapping
+umount -R "${MOUNT}"
+PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 
 # Backup and regenerate fstab
 cp "${MOUNT}"/etc/fstab "${MOUNT}"/etc/fstab.bak
