@@ -29,10 +29,22 @@ PASSWD_ROOT="${PASSWD_ROOT:-root}"
 LUKS="${LUKS:-y}"
 GNOME="${GNOME:-y}"
 KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf &>/dev/null || echo us)"}"
-if [ -f ~/install.txt ]; then
-    TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
-else
-    TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
+TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
+INTERACTIVE="${INTERACTIVE:-y}"
+
+# User Settings dialog
+if [[ "${INTERACTIVE}" == y ]]; then
+    msg "Settings"
+    read -p "Enter username: " -e -i "${MY_USERNAME}" MY_USERNAME
+    read -p "Enter hostname: " -e -i "${MY_HOSTNAME}" MY_HOSTNAME
+    read -p "Install gnome desktop environment? " -e -i "${GNOME}" GNOME
+    read -p "Use luks encryption? " -e -i "${LUKS}" LUKS
+    read -p "Enter keyboard layout: " -e -i "${KEYBOARD_LAYOUT}" KEYBOARD_LAYOUT
+    if [ -f ~/install.txt ]; then
+        TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
+    else
+        read -p "Enter timezone: " -e -i "${TIMEZONE}" TIMEZONE
+    fi
 fi
 
 msg "1 Pre-installation"
