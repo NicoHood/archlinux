@@ -10,11 +10,12 @@ install:
 	install -Dm755 bin/nicohood.mkfs.sh $(DESTDIR)$(BINDIR)/nicohood.mkfs.sh
 	install -Dm755 bin/nicohood.mount.sh $(DESTDIR)$(BINDIR)/nicohood.mount.sh
 	install -Dm755 bin/nicohood.install.sh $(DESTDIR)$(BINDIR)/nicohood.install.sh
-	install -Dm755 bin/common.sh $(DESTDIR)$(BINDIR)/common.sh
+	install -Dm755 bin/nicohood.common.sh $(DESTDIR)$(BINDIR)/nicohood.common.sh
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	ln -sf $(BINDIR)/nicohood.mkfs.sh $(DESTDIR)$(PREFIX)/bin/nicohood.mkfs
 	ln -sf $(BINDIR)/nicohood.mount.sh $(DESTDIR)$(PREFIX)/bin/nicohood.mount
 	ln -sf $(BINDIR)/nicohood.install.sh $(DESTDIR)$(PREFIX)/bin/nicohood.install
+	ln -sf $(BINDIR)/nicohood.common.sh $(DESTDIR)$(PREFIX)/bin/nicohood.common
 	cp -r pkg $(DESTDIR)$(BINDIR)/
 	install -Dm644 Readme.md $(DESTDIR)$(PREFIX)/share/doc/nicohood/Readme.md
 
