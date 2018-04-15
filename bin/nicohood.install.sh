@@ -20,7 +20,7 @@ SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
 [[ ! -b "${DEVICE}" ]] && die "Not a valid device: '${DEVICE}'"
 
-# Default Settings
+# Default settings
 MY_USERNAME="${MY_USERNAME:-"${SUDO_USER:-arch}"}"
 PASSWD_USER="${PASSWD_USER:-toor}"
 MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
@@ -31,9 +31,9 @@ KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf
 TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
 INTERACTIVE="${INTERACTIVE:-y}"
 
-# User Settings dialog
+# User settings dialog
 if [[ "${INTERACTIVE}" == y ]]; then
-    msg "Settings"
+    msg "Settings:"
     read -p "Enter username: " -e -i "${MY_USERNAME}" MY_USERNAME
     read -p "Enter hostname: " -e -i "${MY_HOSTNAME}" MY_HOSTNAME
     read -p "Install gnome desktop environment? " -e -i "${GNOME}" GNOME
@@ -77,7 +77,7 @@ PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLU
 msg2 "1.6 Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
-PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mount "${DEVICE}" "${MOUNT}"
+PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 
 msg "2 Installation"
 
