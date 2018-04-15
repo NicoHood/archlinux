@@ -130,6 +130,7 @@ btrfs subvolume create "${MOUNT}/excludes/srv"
 btrfs subvolume create "${MOUNT}/excludes/backup"
 btrfs subvolume create "${MOUNT}/excludes/backup/custom"
 btrfs subvolume create "${MOUNT}/excludes/luks"
+chmod 000 "${MOUNT}/excludes/luks"
 
 # Add luks key to luks directory
 if [[ "${LUKS}" == "y" ]]; then
