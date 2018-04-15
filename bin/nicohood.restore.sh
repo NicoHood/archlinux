@@ -42,21 +42,33 @@ done < <(find "${BACKUP}/custom" -maxdepth 1 -mindepth 1 -type d -printf '%f\0')
 msg2 "Partition the disks"
 PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLUMES[@]}"
 
-# Create temporary mountpoint and mount btrfs filesystem
+# Create temporary mountpoint and mount bare btrfs filesystem
 msg2 "Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
-PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
+ROOT_DEVICE="${DEVICE}3"
+if cryptsetup isLuks "${DEVICE}3"; then
+    # Open cryptodisks
+    LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
+    [[ -e "/dev/mapper/${LUKS_UUID}" ]] && die "Luks device ${LUKS_UUID} already opened."
+    if [[ -z "${PASSWD_ROOT}" ]]; then
+        cryptsetup luksOpen "${DEVICE}3" "${LUKS_UUID}" || die "Error opening Luks."
+    else
+        echo "${PASSWD_ROOT}" | cryptsetup luksOpen "${DEVICE}3" "${LUKS_UUID}"
+    fi
+    ROOT_DEVICE="/dev/mapper/${LUKS_UUID}"
+fi
+mount "${ROOT_DEVICE}" "${MOUNT}"
 
 function copy_subvolume()
 {
     config="${1}"
     SRC_DIR="$(find "${BACKUP}/${config}/" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
     msg2 "Transfering snapshot '${SRC_DIR}'..."
-    btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/.btrfs/subvolumes/"
-    btrfs subvolume delete "${MOUNT}/.btrfs/subvolumes/${config}"
-    btrfs subvolume snapshot "${MOUNT}/.btrfs/subvolumes/snapshot" "${MOUNT}/.btrfs/subvolumes/${config}"
-    btrfs subvolume delete "${MOUNT}/.btrfs/subvolumes/snapshot"
+    btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
+    btrfs subvolume delete "${MOUNT}/.subvolumes/${config}"
+    btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/${config}"
+    btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
 }
 
 # Copy subvolumes to destination
@@ -71,7 +83,6 @@ done
 # Remount with real filesystem mapping
 umount -R "${MOUNT}"
 if [[ "${LUKS}" == "y" ]]; then
-    LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
     cryptsetup luksClose "${LUKS_UUID}"
 fi
 PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
