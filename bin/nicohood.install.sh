@@ -22,7 +22,7 @@ SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 [[ ! -b "${DEVICE}" ]] && die "Not a valid device: '${DEVICE}'"
 
 # Settings
-MY_USERNAME="${MY_USERNAME:-"${SUDO_USER}"}"
+MY_USERNAME="${MY_USERNAME:-"${SUDO_USER:-arch}"}"
 PASSWD_USER="${PASSWD_USER:-toor}"
 MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
 export RANDOM_SOURCE="${RANDOM_SOURCE:-random}"
@@ -30,10 +30,9 @@ export PASSWD_ROOT="${PASSWD_ROOT:-root}"
 export LUKS="${LUKS:-y}"
 VM="${VM:-n}"
 GNOME="${GNOME:-n}"
-KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf || echo us)"}"
+KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf &>/dev/null || echo us)"}"
 if [ -f ~/install.txt ]; then
     TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
-    MY_USERNAME="${MY_USERNAME:-arch}"
 else
     TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
 fi
