@@ -21,14 +21,13 @@ SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
 [[ ! -b "${DEVICE}" ]] && die "Not a valid device: '${DEVICE}'"
 
-# Settings
+# Default Settings
 MY_USERNAME="${MY_USERNAME:-"${SUDO_USER:-arch}"}"
 PASSWD_USER="${PASSWD_USER:-toor}"
 MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
 export PASSWD_ROOT="${PASSWD_ROOT:-root}"
 export LUKS="${LUKS:-y}"
-VM="${VM:-n}"
-GNOME="${GNOME:-n}"
+GNOME="${GNOME:-y}"
 KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf &>/dev/null || echo us)"}"
 if [ -f ~/install.txt ]; then
     TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
@@ -83,9 +82,6 @@ msg2 "2.2 Install the base packages"
 PACKAGES=("pkg/base.pacman")
 if [[ "${GNOME}" == "y" ]]; then
     PACKAGES+=("pkg/gnome.pacman")
-fi
-if [[ "${VM}" == "y" ]]; then
-    PACKAGES+=("pkg/vm.pacman")
 fi
 
 # Use local package cache for non livecd installations
