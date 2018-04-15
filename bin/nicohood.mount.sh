@@ -10,7 +10,6 @@ if [[ "$#" -ne 2 || "$1" == "--help" || "$1" == "-h" ]]; then
     echo "Usage: $(basename "$0") <device> <mountpoint>"
     exit 0
 fi
-echo ""
 
 # Get parameters
 DEVICE="${1}"
