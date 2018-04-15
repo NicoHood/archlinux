@@ -104,7 +104,7 @@ function check_dependency()
 
 # Trap errors
 set -o errexit -o errtrace -u
-trap 'die "Error on or near line ${LINENO}."' ERR
+trap 'die "${BASH_SOURCE[0]}: Error on or near line ${LINENO}."' ERR
 trap kill_exit SIGTERM SIGINT SIGHUP
 
 # Check if dependencies are available
