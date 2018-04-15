@@ -66,7 +66,7 @@ function copy_subvolume()
     SRC_DIR="$(find "${BACKUP}/${config}/" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
     msg2 "Transfering snapshot '${SRC_DIR}'..."
     btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
-    btrfs subvolume delete "${MOUNT}/.subvolumes/${config}"
+    btrfs subvolume delete "${MOUNT}/subvolumes/${config}"
     btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/${config}"
     btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
 }
