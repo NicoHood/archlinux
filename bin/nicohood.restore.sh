@@ -36,7 +36,7 @@ SUBVOLUMES=()
 while IFS= read -r -d '' subvolume
 do
     SUBVOLUMES+=("${subvolume}")
-done < <(find "${BACKUP}/custom" -maxdepth 1 -mindepth 1 -type d -print0)
+done < <(find "${BACKUP}/custom" -maxdepth 1 -mindepth 1 -type d -printf '%f\0')
 
 # TODO remove
 echo "subvolumes: ${SUBVOLUMES[@]}"
