@@ -144,7 +144,7 @@ if [[ "${LUKS}" == "y" ]]; then
 fi
 
 # Format efi partition
-mkfs.fat -F32 "${DEVICE}2"
+mkfs.fat -F32 -s 1 -S 4096 -v "${DEVICE}2"
 
 # Unmount btrfs filesystem
 umount "${MOUNT}"
