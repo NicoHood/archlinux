@@ -29,13 +29,17 @@ if ! ping archlinux.org -c 4; then
 fi
 
 # Last user check
-read -r -p "Press enter to continue."
+read -r -p "Press enter to start installation."
 set -o errexit -o errtrace -u -x -E
 
 # Ntp will be enabled for the target system automatcally via systemd service.
 if [ -f ~/install.txt ]; then
     timedatectl set-ntp true
 fi
+
+# Partition disk
+echo -e "g\nn\n\n\n+1M\nt\n4\nn\n\n\n+512M\nt\n\n1\nn\n\n\n\np\nw\n" | fdisk -w always -W always "${DEVICE}"
+sync
 
 # Create filesystems
 mkfs.fat -F32 -s 1 -S 4096 -v "${DEVICE}2"
