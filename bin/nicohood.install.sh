@@ -83,9 +83,10 @@ msg "2 Installation"
 
 # Mirror selection
 msg2 "2.1 Select the mirrors"
-cp "${MOUNT}/etc/pacman.d/mirrorlist" "${MOUNT}/etc/pacman.d/mirrorlist.bak"
-curl -s "https://www.archlinux.org/mirrorlist/?country=DE&country=GB&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on" \
-    | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors - > "${MOUNT}/etc/pacman.d/mirrorlist"
+if [ -f ~/install.txt ]; then
+    curl -s "https://www.archlinux.org/mirrorlist/?country=DE&country=GB&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on" \
+        | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors - > "/etc/pacman.d/mirrorlist"
+fi
 
 # Install basic system and chroot
 msg2 "2.2 Install the base packages"

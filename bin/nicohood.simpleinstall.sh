@@ -53,8 +53,10 @@ mkdir -p "${MOUNT}/boot/efi"
 mount "${DEVICE}2" "${MOUNT}/boot/efi"
 
 # Mirror selection
-curl -s "https://www.archlinux.org/mirrorlist/?country=DE&country=GB&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on" \
-    | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors - > "${MOUNT}/etc/pacman.d/mirrorlist"
+if [ -f ~/install.txt ]; then
+    curl -s "https://www.archlinux.org/mirrorlist/?country=DE&country=GB&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on" \
+        | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors - > "/etc/pacman.d/mirrorlist"
+fi
 
 # Install base system
 pacstrap "${MOUNT}" base grub efibootmgr bash-completion intel-ucode \
