@@ -44,15 +44,9 @@ PASSWD_ROOT="${PASSWD_ROOT:-""}"
 # +1M bios boot partition
 # +512M EFI /boot/efi partition
 # 100% luks root / partition
-wipefs -a "${DEVICE}"
 plain "Partitioning disk."
-echo -e "g\nn\n\n\n+1M\nt\n4\nn\n\n\n+512M\nt\n\n1\nn\n\n\n\np\nw\n" | fdisk "${DEVICE}"
+echo -e "g\nn\n\n\n+1M\nt\n4\nn\n\n\n+512M\nt\n\n1\nn\n\n\n\np\nw\n" | fdisk -w always -W always "${DEVICE}"
 sync
-
-# Make sure that all new partitions do not contain any filesystem signatures anymore
-wipefs -a "${DEVICE}1"
-wipefs -a "${DEVICE}2"
-wipefs -a "${DEVICE}3"
 
 ROOT_DEVICE="${DEVICE}3"
 if [[ "${LUKS}" == "y" ]]; then
