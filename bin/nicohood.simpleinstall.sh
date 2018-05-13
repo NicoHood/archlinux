@@ -13,9 +13,9 @@ DEVICE="${1}"
 
 # User settings dialog
 echo "Settings:"
-read -p "Enter username: " -e -i "arch" MY_USERNAME
-read -p "Enter hostname: " -e -i "archlinuxpc" MY_HOSTNAME
-read -p "Enter keyboard layout: " -e -i "$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf &>/dev/null || echo us)" KEYBOARD_LAYOUT
+read -rp "Enter username: " -e -i "arch" MY_USERNAME
+read -rp "Enter hostname: " -e -i "archlinuxpc" MY_HOSTNAME
+read -rp "Enter keyboard layout: " -e -i "$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf &>/dev/null || echo us)" KEYBOARD_LAYOUT
 TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
 
 # Boot CD in EFI mode
