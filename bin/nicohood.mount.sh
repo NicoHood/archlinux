@@ -65,11 +65,9 @@ mount -o subvol=excludes/log "${ROOT_DEVICE}" "${MOUNT}/var/log"
 mkdir -p "${MOUNT}/srv"
 mount -o subvol=excludes/srv "${ROOT_DEVICE}" "${MOUNT}/srv"
 mkdir -p "${MOUNT}/backup"
-mount -o subvol=excludes/backup "${ROOT_DEVICE}" "${MOUNT}/backup"
-mkdir -p "${MOUNT}/backup/custom"
-mount -o subvol=excludes/backup/custom "${ROOT_DEVICE}" "${MOUNT}/backup/custom"
+mount -o subvol=backup "${ROOT_DEVICE}" "${MOUNT}/backup"
 mkdir -p "${MOUNT}/root/luks"
-mount -o subvol=excludes/luks "${ROOT_DEVICE}" "${MOUNT}/root/luks"
+mount -o subvol=luks "${ROOT_DEVICE}" "${MOUNT}/root/luks"
 
 # Mount custom user subvolumes
 plain "Mounting custom user subvolumes."

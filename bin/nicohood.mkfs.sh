@@ -120,20 +120,19 @@ btrfs subvolume create "${MOUNT}/excludes/tmp"
 chmod 1777 "${MOUNT}/excludes/tmp"
 btrfs subvolume create "${MOUNT}/excludes/log"
 btrfs subvolume create "${MOUNT}/excludes/srv"
-btrfs subvolume create "${MOUNT}/excludes/backup"
-btrfs subvolume create "${MOUNT}/excludes/backup/custom"
-btrfs subvolume create "${MOUNT}/excludes/luks"
-chmod 000 "${MOUNT}/excludes/luks"
+btrfs subvolume create "${MOUNT}/backup"
+btrfs subvolume create "${MOUNT}/luks"
+chmod 000 "${MOUNT}/luks"
 
 # Add luks key to luks directory
 if [[ "${LUKS}" == "y" ]]; then
-    dd bs=512 count=4 iflag=fullblock if=/dev/random of="${MOUNT}/excludes/luks/crypto_keyfile.bin"
+    dd bs=512 count=4 iflag=fullblock if=/dev/random of="${MOUNT}/luks/crypto_keyfile.bin"
     sync
-    chmod 000 "${MOUNT}/excludes/luks/crypto_keyfile.bin"
+    chmod 000 "${MOUNT}/luks/crypto_keyfile.bin"
     if [[ -z "${PASSWD_ROOT}" ]]; then
-        cryptsetup luksAddKey "${DEVICE}3" "${MOUNT}/excludes/luks/crypto_keyfile.bin"
+        cryptsetup luksAddKey "${DEVICE}3" "${MOUNT}/luks/crypto_keyfile.bin"
     else
-        echo "${PASSWD_ROOT}" | cryptsetup luksAddKey "${DEVICE}3" "${MOUNT}/excludes/luks/crypto_keyfile.bin"
+        echo "${PASSWD_ROOT}" | cryptsetup luksAddKey "${DEVICE}3" "${MOUNT}/luks/crypto_keyfile.bin"
     fi
 fi
 
