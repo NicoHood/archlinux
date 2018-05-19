@@ -64,6 +64,8 @@ mkdir -p "${MOUNT}/var/log"
 mount -o subvol=excludes/log "${ROOT_DEVICE}" "${MOUNT}/var/log"
 mkdir -p "${MOUNT}/srv"
 mount -o subvol=excludes/srv "${ROOT_DEVICE}" "${MOUNT}/srv"
+
+# Mount backup and luks subvolume
 mkdir -p "${MOUNT}/backup"
 mount -o subvol=backup "${ROOT_DEVICE}" "${MOUNT}/backup"
 mkdir -p "${MOUNT}/root/luks"

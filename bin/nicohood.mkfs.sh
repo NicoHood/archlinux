@@ -120,7 +120,6 @@ btrfs subvolume create "${MOUNT}/excludes/tmp"
 chmod 1777 "${MOUNT}/excludes/tmp"
 btrfs subvolume create "${MOUNT}/excludes/log"
 btrfs subvolume create "${MOUNT}/excludes/srv"
-btrfs subvolume create "${MOUNT}/backup"
 btrfs subvolume create "${MOUNT}/luks"
 chmod 000 "${MOUNT}/luks"
 
