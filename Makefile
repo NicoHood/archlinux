@@ -12,7 +12,7 @@ install:
 	install -Dm755 bin/nicohood.install.sh $(DESTDIR)$(BINDIR)/nicohood.install.sh
 	install -Dm755 bin/nicohood.restore.sh $(DESTDIR)$(BINDIR)/nicohood.restore.sh
 	install -Dm755 bin/nicohood.clone.sh $(DESTDIR)$(BINDIR)/nicohood.clone.sh
-	install -Dm755 bin/nicohood.configure.sh $(DESTDIR)$(BINDIR)/nicohood.configure.sh
+	install -Dm755 bin/nicohood.configure.snapper.sh $(DESTDIR)$(BINDIR)/nicohood.configure.snapper.sh
 	install -Dm755 bin/nicohood.common.sh $(DESTDIR)$(BINDIR)/nicohood.common.sh
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	ln -sf $(BINDIR)/nicohood.mkfs.sh $(DESTDIR)$(PREFIX)/bin/nicohood.mkfs
@@ -20,7 +20,7 @@ install:
 	ln -sf $(BINDIR)/nicohood.install.sh $(DESTDIR)$(PREFIX)/bin/nicohood.install
 	ln -sf $(BINDIR)/nicohood.restore.sh $(DESTDIR)$(PREFIX)/bin/nicohood.restore
 	ln -sf $(BINDIR)/nicohood.clone.sh $(DESTDIR)$(PREFIX)/bin/nicohood.clone
-	ln -sf $(BINDIR)/nicohood.configure.sh $(DESTDIR)$(PREFIX)/bin/nicohood.configure
+	ln -sf $(BINDIR)/nicohood.configure.snapper.sh $(DESTDIR)$(PREFIX)/bin/nicohood.configure.snapper
 	ln -sf $(BINDIR)/nicohood.common.sh $(DESTDIR)$(PREFIX)/bin/nicohood.common
 	cp -r pkg $(DESTDIR)$(BINDIR)/
 	install -Dm644 Readme.md $(DESTDIR)$(PREFIX)/share/doc/nicohood/Readme.md
@@ -32,6 +32,6 @@ uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.install
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.restore
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.clone
-	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.configure
+	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.configure.snapper
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.common
 	rm -f $(DESTDIR)$(PREFIX)/share/doc/nicohood/Readme.md
