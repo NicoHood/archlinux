@@ -62,6 +62,11 @@ if ! ping archlinux.org -c 4; then
     die "No network connection."
 fi
 
+# Last user check
+if [[ "${INTERACTIVE}" == y ]]; then
+    read -rp "Press enter to start the installation now."
+fi
+
 # Set time
 # Ntp will be enabled for the target system automatcally via systemd service.
 msg2 "1.4 Update the system clock"
