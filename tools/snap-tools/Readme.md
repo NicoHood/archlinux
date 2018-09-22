@@ -141,13 +141,75 @@ fat32
 * Update Arch Linux mirrorlist.
 * Do user customization (with gnome-settings and gnome-tweaks tool)
 * Enable ssh (via gnome settings)
-* [Enable DNS caching](https://wiki.archlinux.org/index.php/dnsmasq#NetworkManager)
+* [Enable DNS caching](https://wiki.archlinux.org/index.php/NetworkManager#Enable_DNS_Caching)
 * [Enable hostname resolution](https://wiki.archlinux.org/index.php/avahi#Hostname_resolution)
 * [Enable color output for Pacman](https://wiki.archlinux.org/index.php/Color_output_in_console#pacman)
 * Configure `~/.bashrc` and `/etc/inputrc` (see configs below)
 * Configure `~/.makepkg.conf`
-* Set plank theme to transparent: `plank --preferences`
+* Set plank theme to transparent: `plank --preferences` (must run in x11 mode)
 * Check if `systemctl status rngd.service` is active, otherwise install `haveged` (e.g. if you have slow boot time)
+
+### .bashrc
+```
+~/.bashrc
+---------
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+# Improve color output
+alias ls='ls --color=auto'
+PS1='[\u@\h \W]\$ '
+
+# Default editor
+export EDITOR=nano
+
+# Unlimited scrollback
+export HISTSIZE=-1
+export HISTFILESIZE=-1
+export HISTCONTROL=ignoredups
+
+# Use ssh-agent
+if ! pgrep -u "$USER" ssh-agent > /dev/null; then
+    ssh-agent > ~/.ssh-agent-thing
+fi
+if [[ "$SSH_AGENT_PID" == "" ]]; then
+    eval $(<~/.ssh-agent-thing) > /dev/null
+fi
+
+# Enable "fuck" command
+eval $(thefuck --alias)
+```
+
+### inputrc
+```
+/etc/inputrc
+------------
+[...]
+
+# Use Shift+Up/Down to search history
+"\e[1;2A": history-search-backward
+"\e[1;2B": history-search-forward
+```
+
+### makepkg.conf
+```
+mkdir -p ~/data/makepkg/{src,pkg,srcpkg,log}
+~/.makepkg.conf
+---------------
+PACKAGER="NicoHood <nicohood@archlinux.org>"
+INTEGRITY_CHECK=sha512
+MAKEFLAGS="-j$(nproc)"
+COMPRESSXZ=(xz -9 -c -z - --threads=0)
+BUILDDIR=/tmp/makepkg
+SRCDEST=~/data/makepkg/src
+PKGDEST=~/data/makepkg/pkg
+SRCPKGDEST=~/data/makepkg/srcpkg
+LOGDEST=~/data/makepkg/log
+```
 
 ## TODO
 * shellcheck
