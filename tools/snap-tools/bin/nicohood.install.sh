@@ -27,7 +27,7 @@ MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
 PASSWD_ROOT="${PASSWD_ROOT:-root}"
 LUKS="${LUKS:-y}"
 GNOME="${GNOME:-y}"
-KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf &>/dev/null || echo us)"}"
+KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf 2>/dev/null || echo us)"}"
 TIMEZONE="${TIMEZONE:-"$(readlink -fe /etc/localtime)"}"
 INTERACTIVE="${INTERACTIVE:-y}"
 

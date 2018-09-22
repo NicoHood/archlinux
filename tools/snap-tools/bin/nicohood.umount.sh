@@ -33,6 +33,6 @@ findmnt "${ROOT_DEVICE}" -n -o target | while read mountpoint ; do
 done
 
 # Close luks container
-if [[ -e "/dev/mapper/${LUKS_UUID}" ]]; then
+if [[ -n "${LUKS_UUID}" ]] && [[ -e "/dev/mapper/${LUKS_UUID}" ]]; then
     cryptsetup luksClose "${LUKS_UUID}"
 fi
