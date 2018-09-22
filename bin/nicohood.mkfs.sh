@@ -7,6 +7,8 @@ source "${BASH_SOURCE%/*}/nicohood.common"
 # Check input parameters
 if [[ "$#" -lt 1 || "$1" == "--help" || "$1" == "-h" ]]; then
     echo "Usage: $(basename "$0") <device> [subvolumes]"
+    echo "Creates a partition layout with encrypted btrfs root filesystem."
+    echo "Support Bios and Uefi installations."
     echo "Default subvolumes: ${DEFAULT_SUBVOLUMES[@]}"
     exit 0
 fi

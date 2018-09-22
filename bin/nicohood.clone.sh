@@ -6,8 +6,8 @@ source "${BASH_SOURCE%/*}/nicohood.common"
 
 # Check input parameters
 if [[ "$#" -ne 1 || "$1" == "--help" || "$1" == "-h" ]]; then
-    echo "Can be used to restore clone a running system."
     echo "Usage: $(basename "$0") <device>"
+    echo "Can be used to clone a running system to a new, empty disk."
     exit 0
 fi
 
@@ -20,4 +20,4 @@ DEVICE="${1}"
 
 # Take new snapshots, then backup
 systemctl start --wait snapper-timeline.service
-nicohood.restore "${DEVICE}" "/.btrfs/snapshots"
+nicohood.restore "/.btrfs/snapshots" "${DEVICE}"

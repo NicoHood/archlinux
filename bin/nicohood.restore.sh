@@ -6,14 +6,14 @@ source "${BASH_SOURCE%/*}/nicohood.common"
 
 # Check input parameters
 if [[ "$#" -ne 2 || "$1" == "--help" || "$1" == "-h" ]]; then
-    echo "Can be used to restore a backup."
-    echo "Usage: $(basename "$0") <device> <backup>"
+    echo "Usage: $(basename "$0") <backup source> <destination blockdevice>"
+    echo "Can be used to restore a backup to a new, empty disk."
     exit 0
 fi
 
 # Get parameters
-DEVICE="${1}"
-BACKUP="${2}"
+BACKUP="${1}"
+DEVICE="${2}"
 
 # Check user, device and mountpoint
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
@@ -28,10 +28,10 @@ INTERACTIVE="${INTERACTIVE:-y}"
 # User settings dialog
 if [[ "${INTERACTIVE}" == y ]]; then
     msg "Settings:"
-    read -p "Use luks encryption? " -e -i "${LUKS}" LUKS
+    read -p "Use luks encryption for new disk? " -e -i "${LUKS}" LUKS
 fi
 
-# Find custom subvolumes
+# Find custom subvolumes used in the backup
 SUBVOLUMES=()
 while IFS= read -r -d '' subvolume
 do
