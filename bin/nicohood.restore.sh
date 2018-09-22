@@ -47,7 +47,7 @@ msg2 "Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
 ROOT_DEVICE="${DEVICE}3"
-if cryptsetup isLuks "${DEVICE}3"; then
+if [[ "${LUKS}" == "y" ]]; then
     # Open cryptodisks
     LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
     [[ -e "/dev/mapper/${LUKS_UUID}" ]] && die "Luks device ${LUKS_UUID} already opened."
@@ -60,6 +60,7 @@ if cryptsetup isLuks "${DEVICE}3"; then
 fi
 mount "${ROOT_DEVICE}" "${MOUNT}"
 
+#TODO test if using .btrfs now works if the root does not get deleted.
 function copy_subvolume()
 {
     config="${1}"
@@ -68,10 +69,11 @@ function copy_subvolume()
     btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
     btrfs subvolume delete "${MOUNT}/subvolumes/${config}"
     btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/${config}"
-    btrfs subvolume delete "${MOUNT}/subvolumes/snapshot"
+    mv "${MOUNT}/subvolumes/snapshot" "${MOUNT}/backup/old/${config}"
 }
 
 # Copy subvolumes to destination
+btrfs subvolume create "${MOUNT}/backup/old/custom"
 copy_subvolume root
 copy_subvolume home
 copy_subvolume user
@@ -86,6 +88,8 @@ if [[ "${LUKS}" == "y" ]]; then
     cryptsetup luksClose "${LUKS_UUID}"
 fi
 PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
+
+# TODO delete old/initial files in backup/old
 
 # Backup and regenerate fstab
 cp "${MOUNT}"/etc/fstab "${MOUNT}"/etc/fstab.bak
