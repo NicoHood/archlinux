@@ -10,7 +10,7 @@ echo "More information: https://wiki.archlinux.org/index.php/installation_guide"
 echo ""
 
 # Default settings
-DEFAULT_SUBVOLUMES=(git vm data Documents Video Music Downloads Pictures)
+DEFAULT_SUBVOLUMES=(git vm data Documents Videos Music Downloads Pictures)
 
 # Avoid any encoding problems
 export LANG=C
@@ -109,5 +109,5 @@ trap kill_exit SIGTERM SIGINT SIGHUP
 
 # Check if dependencies are available
 # Dependencies: bash arch-install-scripts btrfs-progs dosfstools sed cryptsetup
-check_dependency pacstrap arch-chroot genfstab btrfs mkfs.fat sed cryptsetup \
+check_dependency pacstrap arch-chroot genfstab btrfs mkfs.fat sed cryptsetup rankmirrors \
      || die "Please install the missing dependencies."

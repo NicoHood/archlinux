@@ -89,6 +89,7 @@ msg "2 Installation"
 # Mirror selection
 msg2 "2.1 Select the mirrors"
 if [ -f ~/install.txt ]; then
+    cp "/etc/pacman.d/mirrorlist" "/etc/pacman.d/mirrorlist.bak"
     curl -s "https://www.archlinux.org/mirrorlist/?country=DE&country=GB&protocol=https&ip_version=4&ip_version=6&use_mirror_status=on" \
         | sed -e 's/^#Server/Server/' -e '/^#/d' | rankmirrors - > "/etc/pacman.d/mirrorlist"
 fi
@@ -113,8 +114,8 @@ msg "3 Configure the system"
 msg2 "3.1 Fstab"
 genfstab -U "${MOUNT}" > "${MOUNT}"/etc/fstab
 
-msg2 "3.1 Chroot"
 # All chroot is done with a separate command to make the script better readable in editors
+msg2 "3.1 Chroot"
 
 # Set time zone
 msg2 "3.3 Time zone"
@@ -132,7 +133,7 @@ echo "KEYMAP=${KEYBOARD_LAYOUT}" > "${MOUNT}"/etc/vconsole.conf
 
 # Hostname
 msg2 "3.5 Hostname"
-echo "${MY_HOSTNAME}" > "${MOUNT}"/etc/hostname
+echo "${MY_HOSTNAME,,}" > "${MOUNT}"/etc/hostname
 
 msg2 "3.6 Network configuration"
 if [[ "${GNOME}" != "y" ]]; then
