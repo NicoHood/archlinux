@@ -18,6 +18,9 @@ DEVICE="${1}"
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
 [[ ! -b "${DEVICE}" ]] && die "Not a valid device: '${DEVICE}'"
 
+# Check if snapper is installed and configured
+check_dependency snapper || die "Please install snapper and set it up first!"
+
 # Take new snapshots, then backup
 systemctl start --wait snapper-timeline.service
 nicohood.restore "/.btrfs/snapshots" "${DEVICE}"
