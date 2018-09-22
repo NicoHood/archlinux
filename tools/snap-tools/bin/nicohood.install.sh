@@ -7,7 +7,7 @@ source "${BASH_SOURCE%/*}/nicohood.common"
 # Check input parameters
 if [[ "$#" -lt 1 || "$1" == "--help" || "$1" == "-h" ]]; then
     echo "Usage: $(basename "$0") <device> [subvolumes]"
-    echo "Default subvolumes: ${DEFAULT_SUBVOLUMES[@]}"
+    echo "Default subvolumes: ${DEFAULT_SUBVOLUMES[*]}"
     exit 0
 fi
 
@@ -98,7 +98,7 @@ fi
 msg2 "2.2 Install the base packages"
 
 # Determine packages to install
-RESOURCE_DIR="$(realpath "${BASH_SOURCE%/*}")"
+RESOURCE_DIR="$(dirname "$(realpath "${BASH_SOURCE}")")"
 PACKAGES=("${RESOURCE_DIR}/pkg/base.pacman")
 if [[ "${GNOME}" == "y" ]]; then
     PACKAGES+=("${RESOURCE_DIR}/pkg/gnome.pacman")
