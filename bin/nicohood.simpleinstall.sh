@@ -60,7 +60,7 @@ fi
 
 # Install base system
 pacstrap "${MOUNT}" base grub efibootmgr bash-completion intel-ucode \
-    os-prober rng-tools sudo ttf-dejavu ttf-liberation
+    os-prober rng-tools sudo
 
 # Generate fstab entries
 genfstab -U "${MOUNT}" > "${MOUNT}"/etc/fstab

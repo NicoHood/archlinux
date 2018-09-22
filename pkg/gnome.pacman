@@ -37,6 +37,9 @@ gnome-themes-extra
 arc-icon-theme
 elementary-icon-theme
 adwaita-icon-theme
+noto-fonts-emoji
+ttf-dejavu
+ttf-liberation
 
 gnome-terminal
 nautilus
