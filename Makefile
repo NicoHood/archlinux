@@ -9,6 +9,7 @@ all:
 install:
 	install -Dm755 bin/nicohood.mkfs.sh $(DESTDIR)$(BINDIR)/nicohood.mkfs.sh
 	install -Dm755 bin/nicohood.mount.sh $(DESTDIR)$(BINDIR)/nicohood.mount.sh
+	install -Dm755 bin/nicohood.umount.sh $(DESTDIR)$(BINDIR)/nicohood.umount.sh
 	install -Dm755 bin/nicohood.install.sh $(DESTDIR)$(BINDIR)/nicohood.install.sh
 	install -Dm755 bin/nicohood.restore.sh $(DESTDIR)$(BINDIR)/nicohood.restore.sh
 	install -Dm755 bin/nicohood.clone.sh $(DESTDIR)$(BINDIR)/nicohood.clone.sh
@@ -17,6 +18,7 @@ install:
 	mkdir -p $(DESTDIR)$(PREFIX)/bin
 	ln -sf $(BINDIR)/nicohood.mkfs.sh $(DESTDIR)$(PREFIX)/bin/nicohood.mkfs
 	ln -sf $(BINDIR)/nicohood.mount.sh $(DESTDIR)$(PREFIX)/bin/nicohood.mount
+	ln -sf $(BINDIR)/nicohood.umount.sh $(DESTDIR)$(PREFIX)/bin/nicohood.umount
 	ln -sf $(BINDIR)/nicohood.install.sh $(DESTDIR)$(PREFIX)/bin/nicohood.install
 	ln -sf $(BINDIR)/nicohood.restore.sh $(DESTDIR)$(PREFIX)/bin/nicohood.restore
 	ln -sf $(BINDIR)/nicohood.clone.sh $(DESTDIR)$(PREFIX)/bin/nicohood.clone
@@ -29,6 +31,7 @@ uninstall:
 	rm -rf $(DESTDIR)$(BINDIR)
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.mkfs
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.mount
+	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.umount
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.install
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.restore
 	rm -f $(DESTDIR)$(PREFIX)/bin/nicohood.clone
