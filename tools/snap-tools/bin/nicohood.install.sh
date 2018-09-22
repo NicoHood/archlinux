@@ -98,9 +98,10 @@ fi
 msg2 "2.2 Install the base packages"
 
 # Determine packages to install
-PACKAGES=("pkg/base.pacman")
+RESOURCE_DIR="$(realpath "${BASH_SOURCE%/*}")"
+PACKAGES=("${RESOURCE_DIR}/pkg/base.pacman")
 if [[ "${GNOME}" == "y" ]]; then
-    PACKAGES+=("pkg/gnome.pacman")
+    PACKAGES+=("${RESOURCE_DIR}/pkg/gnome.pacman")
 fi
 
 # Use local package cache for non livecd installations
