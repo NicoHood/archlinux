@@ -5,7 +5,7 @@
 source "${BASH_SOURCE%/*}/nicohood.common"
 
 # Check input parameters
-if [[ "$#" -ne 2 || "$1" == "--help" || "$1" == "-h" ]]; then
+if [[ "$#" -ne 1 || "$1" == "--help" || "$1" == "-h" ]]; then
     echo "Usage: $(basename "$0") <device>"
     echo "Unmounts a disk partitioned and formatted with the specific layout."
     exit 0
