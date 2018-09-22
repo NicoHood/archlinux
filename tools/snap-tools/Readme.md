@@ -28,7 +28,7 @@ This installation method is only suitable for live disks. It installs the softwa
 mount -o remount,size=1G /run/archiso/cowspace
 pacman -Sy git base-devel pacman-contrib --needed --noconfirm
 git clone https://github.com/nicohoood/archlinux.git
-make install -C archlinux PREFIX=/usr/local
+make install -C archlinux/tools/snap-tools PREFIX=/usr/local
 ```
 
 #### Existing Installation

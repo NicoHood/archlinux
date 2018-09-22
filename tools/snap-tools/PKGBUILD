@@ -3,7 +3,7 @@
 
 pkgname=nicohood
 _pkgname=archlinux
-pkgver=0.0.9
+pkgver=0.0.14
 pkgrel=1
 pkgdesc="A collection of personal Arch Linux tools."
 arch=('any')
@@ -18,5 +18,5 @@ sha512sums=('79a49ff6c283b5efbe854bec3937d1220f94fbe83d27de4025cea732619522312ae
 validpgpkeys=('97312D5EB9D7AE7D0BD4307351DAE9B7C1AE9161')
 
 package() {
-    make -C "${_pkgname}-${pkgver}" DESTDIR="${pkgdir}" install
+    make -C "${_pkgname}-${pkgver}/tools/snap-tools" DESTDIR="${pkgdir}" install
 }
