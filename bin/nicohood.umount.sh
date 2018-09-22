@@ -27,9 +27,12 @@ if cryptsetup isLuks "${ROOT_DEVICE}"; then
 fi
 
 # Unmount filesystem
-umount -R "$(findmnt "${ROOT_DEVICE}" -f -n -o target)"
+umount -R "$(findmnt "${DEVICE}2" -f -n -o target)" || echo "Already unmounted"
+findmnt "${ROOT_DEVICE}" -n -o target | while read mountpoint ; do
+    umount -R "${mountpoint}" || echo "'${mountpoint}' already unmounted"
+done
 
 # Close luks container
-if [[ "${LUKS_UUID}" != "" ]]; then
+if [[ -e "/dev/mapper/${LUKS_UUID}" ]]; then
     cryptsetup luksClose "${LUKS_UUID}"
 fi
