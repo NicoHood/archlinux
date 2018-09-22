@@ -42,38 +42,37 @@ done < <(find "${BACKUP}/custom" -maxdepth 1 -mindepth 1 -type d -printf '%f\0')
 msg2 "Partition the disks"
 PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLUMES[@]}"
 
-# Create temporary mountpoint and mount bare btrfs filesystem
+# Create temporary mountpoint and mount btrfs filesystem
 msg2 "Mount the file systems"
 mkdir -p /run/media/root/
 MOUNT="$(mktemp -d /run/media/root/mnt.XXXXXXXXXX)"
-ROOT_DEVICE="${DEVICE}3"
-if [[ "${LUKS}" == "y" ]]; then
-    # Open cryptodisks
-    LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
-    [[ -e "/dev/mapper/${LUKS_UUID}" ]] && die "Luks device ${LUKS_UUID} already opened."
-    if [[ -z "${PASSWD_ROOT}" ]]; then
-        cryptsetup luksOpen "${DEVICE}3" "${LUKS_UUID}" || die "Error opening Luks."
-    else
-        echo "${PASSWD_ROOT}" | cryptsetup luksOpen "${DEVICE}3" "${LUKS_UUID}"
-    fi
-    ROOT_DEVICE="/dev/mapper/${LUKS_UUID}"
-fi
-mount "${ROOT_DEVICE}" "${MOUNT}"
+PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 
-#TODO test if using .btrfs now works if the root does not get deleted.
 function copy_subvolume()
 {
     config="${1}"
     SRC_DIR="$(find "${BACKUP}/${config}/" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
-    msg2 "Transfering snapshot '${SRC_DIR}'..."
-    btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/subvolumes/"
-    btrfs subvolume delete "${MOUNT}/subvolumes/${config}"
-    btrfs subvolume snapshot "${MOUNT}/subvolumes/snapshot" "${MOUNT}/subvolumes/${config}"
-    mv "${MOUNT}/subvolumes/snapshot" "${MOUNT}/backup/old/${config}"
+
+    # Transfer snapshots. Saved snapshot is readonly and
+    # must be snapshotted again with write enabled.
+    msg2 "Transferring snapshot '${SRC_DIR}'..."
+    btrfs send "${SRC_DIR}" | btrfs receive "${MOUNT}/.btrfs/subvolumes/"
+
+    # Move the initial subvolume, do not delete it.
+    # It must be moved, as its currently mounted and deletion
+    # would cause the mountpoint to function properly/disappear.
+    # We can delete them after a new remount.
+    mv "${MOUNT}/.btrfs/subvolumes/${config}" "${MOUNT}/.btrfs/backup/old/${config}"
+    btrfs subvolume snapshot "${MOUNT}/.btrfs/subvolumes/snapshot" "${MOUNT}/.btrfs/subvolumes/${config}"
+
+    # Delete the readonly snapshot of the transferrd snapshots.
+    # They are not required, as they represent the new system subvolumes.
+    btrfs subvolume delete "${MOUNT}/.btrfs/subvolumes/snapshot"
 }
 
 # Copy subvolumes to destination
-btrfs subvolume create "${MOUNT}/backup/old/custom"
+btrfs subvolume create "${MOUNT}/.btrfs/backup/old"
+btrfs subvolume create "${MOUNT}/.btrfs/backup/old/custom"
 copy_subvolume root
 copy_subvolume home
 copy_subvolume user
@@ -82,14 +81,16 @@ do
     copy_subvolume "custom/${config}"
 done
 
-# Remount with real filesystem mapping
-umount -R "${MOUNT}"
-if [[ "${LUKS}" == "y" ]]; then
-    cryptsetup luksClose "${LUKS_UUID}"
-fi
+# Remount with real filesystem mapping, of the new transferred backup
+nicohood.umount "${DEVICE}"
 PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 
-# TODO delete old/initial files in backup/old
+# Delete intitial/empty subvolumes created by the mkfs command.
+# Those are not required anymore.
+# Note: The rm command will only work with recent kernels (4.18+) that
+# introduced deleting multiple nested subvolumes with user privilegs.
+# http://lkml.iu.edu/hypermail/linux/kernel/1806.0/02095.html
+rm -rf "${MOUNT}/backup/old"
 
 # Backup and regenerate fstab
 cp "${MOUNT}"/etc/fstab "${MOUNT}"/etc/fstab.bak
@@ -97,6 +98,7 @@ genfstab -U "${MOUNT}" > "${MOUNT}"/etc/fstab
 
 # Install Grub for Efi and BIOS. Efi installation will only work if you booted with efi.
 if [[ "${LUKS}" == "y" ]]; then
+    LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
     cp "${MOUNT}/etc/default/grub" "${MOUNT}/etc/default/grub.bak"
     sed -i "s#cryptdevice=UUID=.*:cryptroot#cryptdevice=UUID=${LUKS_UUID}:cryptroot#" \
         "${MOUNT}/etc/default/grub"
