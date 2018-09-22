@@ -46,6 +46,9 @@ PASSWD_ROOT="${PASSWD_ROOT:-""}"
 # +1M bios boot partition
 # +512M EFI /boot/efi partition
 # 100% luks root / partition
+# NOTE: A custom, smaller root size can be used via environment variable.
+# Make sure to run sudo with the -E flag set, to keep the exported variables.
+# Afterwards you can use fdisk to add another 4th partition for additional data etc.
 ROOT_SIZE="${ROOT_SIZE:-""}"
 plain "Partitioning disk."
 echo -e "g\nn\n\n\n+1M\nt\n4\nn\n\n\n+512M\nt\n\n1\nn\n\n\n${ROOT_SIZE}\np\nw\n" | fdisk -w always -W always "${DEVICE}"
