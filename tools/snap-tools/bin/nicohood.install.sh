@@ -144,20 +144,20 @@ else
     # Enable gnome network and other services
     while read -r line; do
         arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable ${line}"
-    done < pkg/gnome.systemd
+    done < "${RESOURCE_DIR}/pkg/gnome.systemd"
 fi
 
 # Mkinitcpio
 msg2 "3.7 Initramfs"
 
 if [[ "${LUKS}" == "y" ]]; then
-        # Forbit to read initramfs to not get access to embedded crypto keys
-        warning "Setting initramfs permissions to 600. Make sure to also change permissions for your own installed kernels."
-        chmod 600 "${MOUNT}"/boot/initramfs-linux*
+    # Forbit to read initramfs to not get access to embedded crypto keys
+    warning "Setting initramfs permissions to 600. Make sure to also change permissions for your own installed kernels."
+    chmod 600 "${MOUNT}"/boot/initramfs-linux*
 
-        # Add "keymap, encrypt" hooks and "/usr/bin/btrfs" to binaries
-        sed -i 's/^HOOKS=(.*block/\0 keymap encrypt/g' "${MOUNT}"/etc/mkinitcpio.conf
-        sed -i "s#^FILES=(#\0/root/luks/crypto_keyfile.bin#g" "${MOUNT}"/etc/mkinitcpio.conf
+    # Add "keymap, encrypt" hooks and "/usr/bin/btrfs" to binaries
+    sed -i 's/^HOOKS=(.*block/\0 keymap encrypt/g' "${MOUNT}"/etc/mkinitcpio.conf
+    sed -i "s#^FILES=(#\0/root/luks/crypto_keyfile.bin#g" "${MOUNT}"/etc/mkinitcpio.conf
 fi
 sed -i "s#^BINARIES=(#\0/usr/bin/btrfs#g" "${MOUNT}"/etc/mkinitcpio.conf
 
