@@ -166,7 +166,7 @@ arch-chroot "${MOUNT}" /bin/bash -c "mkinitcpio -P"
 # Add new admin user and disable root account
 msg2 "3.8 Root password"
 sed -i '/%wheel.ALL=(ALL) ALL/s/^# //g' "${MOUNT}/etc/sudoers"
-arch-chroot "${MOUNT}" /bin/bash -c "useradd -m -d /home/user -G wheel,users,lp,uucp,lock -s /bin/bash ${MY_USERNAME,,}"
+arch-chroot "${MOUNT}" /bin/bash -c "useradd -m -d /home/user -G wheel,users,lp,uucp,lock,audio -s /bin/bash ${MY_USERNAME,,}"
 echo "${MY_USERNAME,,}:${PASSWD_USER}" | arch-chroot "${MOUNT}" /bin/bash -c "chpasswd"
 arch-chroot "${MOUNT}" /bin/bash -c "chfn -f ${MY_USERNAME} ${MY_USERNAME,,}"
 arch-chroot "${MOUNT}" /bin/bash -c "passwd -l root"
