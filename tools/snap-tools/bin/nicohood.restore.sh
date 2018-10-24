@@ -19,6 +19,7 @@ DEVICE="${2}"
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
 [[ ! -b "${DEVICE}" ]] && die "Not a valid device: '${DEVICE}'"
 [[ ! -d "${BACKUP}" ]] && die "Not a valid backup directory: '${BACKUP}'"
+[[ ! -d "${BACKUP}/custom" ]] && die "Missing custom directory: '${BACKUP}/custom'"
 
 # Default settings
 LUKS="${LUKS:-y}"
