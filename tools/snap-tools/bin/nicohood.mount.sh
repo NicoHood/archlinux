@@ -41,30 +41,42 @@ plain "Mounting default subvolumes and snapshots."
 mount -o subvol=subvolumes/root "${ROOT_DEVICE}" "${MOUNT}"
 mkdir -p "${MOUNT}/.snapshots"
 mount -o subvol=snapshots/root "${ROOT_DEVICE}" "${MOUNT}/.snapshots"
+
 mkdir -p "${MOUNT}/home"
 mount -o subvol=subvolumes/home "${ROOT_DEVICE}" "${MOUNT}/home"
 mkdir -p "${MOUNT}/home/.snapshots"
 mount -o subvol=snapshots/home "${ROOT_DEVICE}" "${MOUNT}/home/.snapshots"
+
+mkdir -p "${MOUNT}/var/cache/pacman/pkg"
+mount -o subvol=subvolumes/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg"
+mkdir -p "${MOUNT}/var/cache/pacman/pkg/.snapshots"
+mount -o subvol=snapshots/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg/.snapshots"
+
+mkdir -p "${MOUNT}/var/tmp"
+mount -o subvol=subvolumes/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp"
+mkdir -p "${MOUNT}/var/tmp/.snapshots"
+mount -o subvol=snapshots/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp/.snapshots"
+
+mkdir -p "${MOUNT}/var/log"
+mount -o subvol=subvolumes/log "${ROOT_DEVICE}" "${MOUNT}/var/log"
+mkdir -p "${MOUNT}/var/log/.snapshots"
+mount -o subvol=snapshots/log "${ROOT_DEVICE}" "${MOUNT}/var/log/.snapshots"
+
+mkdir -p "${MOUNT}/srv"
+mount -o subvol=subvolumes/srv "${ROOT_DEVICE}" "${MOUNT}/srv"
+mkdir -p "${MOUNT}/srv/.snapshots"
+mount -o subvol=snapshots/srv "${ROOT_DEVICE}" "${MOUNT}/srv/.snapshots"
+
 mkdir -p "${MOUNT}/home/user"
 mount -o subvol=subvolumes/user "${ROOT_DEVICE}" "${MOUNT}/home/user"
 mkdir -p "${MOUNT}/home/user/.snapshots"
 mount -o subvol=snapshots/user "${ROOT_DEVICE}" "${MOUNT}/home/user/.snapshots"
 
 # Mount btrfs real root directory to /.btrfs
+# TODO chmod 700 /.btrfs, as rsync overrides this setting. Or the mount command should add this as mount option?
 plain "Mounting root btrfs."
 mkdir -p "${MOUNT}/.btrfs"
 mount "${ROOT_DEVICE}" "${MOUNT}/.btrfs"
-
-# Mount subvolumes which should get excluded from snapper backups
-plain "Mounting exclude subvolumes"
-mkdir -p "${MOUNT}/var/cache/pacman/pkg"
-mount -o subvol=excludes/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg"
-mkdir -p "${MOUNT}/var/tmp"
-mount -o subvol=excludes/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp"
-mkdir -p "${MOUNT}/var/log"
-mount -o subvol=excludes/log "${ROOT_DEVICE}" "${MOUNT}/var/log"
-mkdir -p "${MOUNT}/srv"
-mount -o subvol=excludes/srv "${ROOT_DEVICE}" "${MOUNT}/srv"
 
 # Mount backup and luks subvolume
 mkdir -p "${MOUNT}/backup"

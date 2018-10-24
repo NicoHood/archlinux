@@ -24,9 +24,12 @@ function create_config()
 }
 
 # Create base snapshot configs
+# NOTE: /var/tmp and /var/cache/pacman/pkg will not be backed up, even if technically possible.
 create_config root /
 create_config home /home
 create_config user /home/user
+create_config user /var/log
+create_config user /srv
 
 # Create custom snapshot configs
 while IFS= read -r -d '' config
@@ -38,3 +41,5 @@ done < <(find "/.btrfs/snapshots/custom" -maxdepth 1 -mindepth 1 -type d -printf
 systemctl enable --now snapper-boot.timer
 systemctl enable --now snapper-cleanup.timer
 systemctl enable --now snapper-timeline.timer
+
+echo "Configured snapper successful. Please set your snapshot interval for all configs properly!"

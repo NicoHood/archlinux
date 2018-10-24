@@ -93,13 +93,17 @@ chmod 700 "${MOUNT}"
 btrfs subvolume create "${MOUNT}/subvolumes"
 btrfs subvolume create "${MOUNT}/snapshots"
 btrfs subvolume create "${MOUNT}/backup"
-btrfs subvolume create "${MOUNT}/excludes"
 
 # Create top level subvolumes
 btrfs subvolume create "${MOUNT}/subvolumes/root"
 mkdir -m 750 "${MOUNT}/subvolumes/root/root"
 btrfs subvolume create "${MOUNT}/subvolumes/home"
 btrfs subvolume create "${MOUNT}/subvolumes/user"
+btrfs subvolume create "${MOUNT}/subvolumes/pkg"
+btrfs subvolume create "${MOUNT}/subvolumes/tmp"
+chmod 1777 "${MOUNT}/subvolumes/tmp"
+btrfs subvolume create "${MOUNT}/subvolumes/log"
+btrfs subvolume create "${MOUNT}/subvolumes/srv"
 chmod 700 "${MOUNT}/subvolumes/user"
 chown 1000:1000 "${MOUNT}/subvolumes/user"
 btrfs subvolume create "${MOUNT}/subvolumes/custom"
@@ -114,6 +118,10 @@ done
 btrfs subvolume create "${MOUNT}/snapshots/root"
 btrfs subvolume create "${MOUNT}/snapshots/home"
 btrfs subvolume create "${MOUNT}/snapshots/user"
+btrfs subvolume create "${MOUNT}/snapshots/pkg"
+btrfs subvolume create "${MOUNT}/snapshots/tmp"
+btrfs subvolume create "${MOUNT}/snapshots/log"
+btrfs subvolume create "${MOUNT}/snapshots/srv"
 btrfs subvolume create "${MOUNT}/snapshots/custom"
 for subvol in "${SUBVOLUMES[@]}"
 do
@@ -121,11 +129,6 @@ do
 done
 
 # Create subvolumes untracked by snapper
-btrfs subvolume create "${MOUNT}/excludes/pkg"
-btrfs subvolume create "${MOUNT}/excludes/tmp"
-chmod 1777 "${MOUNT}/excludes/tmp"
-btrfs subvolume create "${MOUNT}/excludes/log"
-btrfs subvolume create "${MOUNT}/excludes/srv"
 btrfs subvolume create "${MOUNT}/luks"
 chmod 000 "${MOUNT}/luks"
 
@@ -149,3 +152,5 @@ umount "${MOUNT}"
 if [[ "${LUKS}" == "y" ]]; then
   cryptsetup luksClose "${LUKS_UUID}"
 fi
+
+msg "Creating filesystem on for ${DEVICE} with temporary mountpoint ${MOUNT} succeeded."
