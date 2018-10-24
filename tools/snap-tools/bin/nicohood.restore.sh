@@ -21,15 +21,22 @@ DEVICE="${2}"
 [[ ! -d "${BACKUP}" ]] && die "Not a valid backup directory: '${BACKUP}'"
 
 # Default settings
-PASSWD_ROOT="${PASSWD_ROOT:-root}"
 LUKS="${LUKS:-y}"
 INTERACTIVE="${INTERACTIVE:-y}"
 
 # User settings dialog
 if [[ "${INTERACTIVE}" == y ]]; then
     msg "Settings:"
-    read -p "Use luks encryption for new disk? " -e -i "${LUKS}" LUKS
+    read -rp "Use luks encryption for new disk? " -e -i "${LUKS}" LUKS
+
+    # Ask for password
+    if [[ "${LUKS}" == "y" ]]; then
+        read -rsp "Please enter your luks password. If none was entered, the default password gets used." PASSWD_ROOT
+    fi
 fi
+
+# Default password if none was entered
+PASSWD_ROOT="${PASSWD_ROOT:-root}"
 
 # Find custom subvolumes used in the backup
 SUBVOLUMES=()

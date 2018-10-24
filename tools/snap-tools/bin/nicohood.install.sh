@@ -22,9 +22,7 @@ SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 
 # Default settings
 MY_USERNAME="${MY_USERNAME:-"${SUDO_USER:-arch}"}"
-PASSWD_USER="${PASSWD_USER:-toor}"
 MY_HOSTNAME="${MY_HOSTNAME:-archlinuxpc}"
-PASSWD_ROOT="${PASSWD_ROOT:-root}"
 LUKS="${LUKS:-y}"
 GNOME="${GNOME:-y}"
 KEYBOARD_LAYOUT="${KEYBOARD_LAYOUT:-"$(sed -n 's/^KEYMAP=//p' /etc/vconsole.conf 2>/dev/null || echo us)"}"
@@ -34,17 +32,26 @@ INTERACTIVE="${INTERACTIVE:-y}"
 # User settings dialog
 if [[ "${INTERACTIVE}" == y ]]; then
     msg "Settings:"
-    read -p "Enter username: " -e -i "${MY_USERNAME}" MY_USERNAME
-    read -p "Enter hostname: " -e -i "${MY_HOSTNAME}" MY_HOSTNAME
-    read -p "Install gnome desktop environment? " -e -i "${GNOME}" GNOME
-    read -p "Use luks encryption? " -e -i "${LUKS}" LUKS
-    read -p "Enter keyboard layout: " -e -i "${KEYBOARD_LAYOUT}" KEYBOARD_LAYOUT
+    read -rp "Enter username: " -e -i "${MY_USERNAME}" MY_USERNAME
+    read -rsp "Please enter your user password. If none was entered, the default password gets used." PASSWD_USER
+    read -rp "Enter hostname: " -e -i "${MY_HOSTNAME}" MY_HOSTNAME
+    read -rp "Install gnome desktop environment? " -e -i "${GNOME}" GNOME
+    read -rp "Use luks encryption? " -e -i "${LUKS}" LUKS
+    # Ask for password
+    if [[ "${LUKS}" == "y" ]]; then
+        read -rsp "Please enter your luks password. If none was entered, the default password gets used." PASSWD_ROOT
+    fi
+    read -rp "Enter keyboard layout: " -e -i "${KEYBOARD_LAYOUT}" KEYBOARD_LAYOUT
     if [ -f ~/install.txt ]; then
         TIMEZONE="/usr/share/zoneinfo/$(tzselect)"
     else
-        read -p "Enter timezone: " -e -i "${TIMEZONE}" TIMEZONE
+        read -rp "Enter timezone: " -e -i "${TIMEZONE}" TIMEZONE
     fi
 fi
+
+# Default password if none was entered
+PASSWD_USER="${PASSWD_USER:-toor}"
+PASSWD_ROOT="${PASSWD_ROOT:-root}"
 
 msg "1 Pre-installation"
 msg2 "1.1 Set the keyboard layout"
