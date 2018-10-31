@@ -84,6 +84,10 @@ btrfs subvolume create "${MOUNT}/.btrfs/backup/old/custom"
 copy_subvolume root
 copy_subvolume home
 copy_subvolume user
+copy_subvolume pkg
+copy_subvolume tmp
+copy_subvolume log
+copy_subvolume srv
 for config in "${SUBVOLUMES[@]}"
 do
     copy_subvolume "custom/${config}"
@@ -116,6 +120,8 @@ arch-chroot "${MOUNT}" /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-install --target=i386-pc ${DEVICE}"
 install -Dm 755 "${MOUNT}/boot/efi/EFI/grub/grubx64.efi" "${MOUNT}/boot/efi/EFI/boot/bootx64.efi"
+install -Dm 755 "${MOUNT}/boot/efi/EFI/grub/grubx64.efi" "${MOUNT}/boot/efi/EFI/debian/grubx64.efi"
+install -Dm 755 "${MOUNT}/boot/efi/EFI/grub/grubx64.efi" "${MOUNT}/boot/efi/EFI/Redhat/grub.efi"
 
 # Generate initramfs
 arch-chroot "${MOUNT}" /bin/bash -c "mkinitcpio -P"
