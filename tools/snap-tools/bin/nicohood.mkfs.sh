@@ -145,6 +145,9 @@ if [[ "${LUKS}" == "y" ]]; then
     fi
 fi
 
+# Add version identifier for snap-tools as text file.
+echo "${VERSION}" > "${MOUNT}/version.txt"
+
 # Format efi partition
 mkfs.fat -F32 -s 1 -S 4096 -v "${DEVICE}2"
 
