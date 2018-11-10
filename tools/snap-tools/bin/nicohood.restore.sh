@@ -59,6 +59,10 @@ PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 function copy_subvolume()
 {
     config="${1}"
+    if [[ ! -d "${BACKUP}/${config}" ]]; then
+        warning "Backup directory '${BACKUP}/${config}' does not exist, skipping subvolume."
+        return
+    fi
     SRC_DIR="$(find "${BACKUP}/${config}/" -maxdepth 1 -mindepth 1 -type d | sort -V | tail -n 1)/snapshot"
 
     # Transfer snapshots. Saved snapshot is readonly and
