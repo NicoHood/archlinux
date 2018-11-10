@@ -109,13 +109,13 @@ PASSWD_ROOT="${PASSWD_ROOT}" nicohood.mount "${DEVICE}" "${MOUNT}"
 rm -rf "${MOUNT}/backup/old"
 
 # Backup and regenerate fstab
-cp "${MOUNT}"/etc/fstab "${MOUNT}"/etc/fstab.bak
+cp "${MOUNT}"/etc/fstab "${MOUNT}"/etc/fstab.bak"$(ls "${MOUNT}"/etc/fstab.bak* | wc -l)"
 genfstab -U "${MOUNT}" > "${MOUNT}"/etc/fstab
 
 # Install Grub for Efi and BIOS. Efi installation will only work if you booted with efi.
 if [[ "${LUKS}" == "y" ]]; then
     LUKS_UUID="$(blkid "${DEVICE}3" -o value -s UUID)"
-    cp "${MOUNT}/etc/default/grub" "${MOUNT}/etc/default/grub.bak"
+    cp "${MOUNT}"/etc/mkinitcpio.conf "${MOUNT}"/etc/mkinitcpio.conf.bak"$(ls "${MOUNT}"/etc/mkinitcpio.conf.bak* | wc -l)"
     sed -i "s#cryptdevice=UUID=.*:cryptroot#cryptdevice=UUID=${LUKS_UUID}:cryptroot#" \
         "${MOUNT}/etc/default/grub"
     sed -i '/GRUB_ENABLE_CRYPTODISK=y/s/^#//g' "${MOUNT}/etc/default/grub"
