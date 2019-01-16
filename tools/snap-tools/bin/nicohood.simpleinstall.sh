@@ -93,6 +93,7 @@ arch-chroot "${MOUNT}" /bin/bash -c "chfn -f ${MY_USERNAME} ${MY_USERNAME,,}"
 arch-chroot "${MOUNT}" /bin/bash -c "passwd -l root"
 
 # Install grub for efi and bios. Efi installation will only work if you booted with efi.
+mkdir -p "${MOUNT}/boot/grub"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-install --target=i386-pc ${DEVICE}"

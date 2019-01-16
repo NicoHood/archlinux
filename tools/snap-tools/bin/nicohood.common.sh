@@ -4,7 +4,7 @@
 [ -n "${_NICOHOOD_COMMON}" ] && return || readonly _NICOHOOD_COMMON=1
 
 # Print initial welcome message with version information
-VERSION="1.0.1"
+VERSION="1.0.2"
 echo "ArchLinux install scripts ${VERSION} https://github.com/NicoHood"
 echo "More information: https://wiki.archlinux.org/index.php/installation_guide"
 echo ""

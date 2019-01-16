@@ -31,6 +31,8 @@ asp
 gdb
 strace
 namcap
+lostfiles
+paccheck
 
 arduino
 jdk8-openjdk

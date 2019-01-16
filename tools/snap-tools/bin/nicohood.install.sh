@@ -189,6 +189,7 @@ if [[ "${LUKS}" == "y" ]]; then
 fi
 sed -i "/^GRUB_DEFAULT=.*/s/=.*/='Arch Linux, with Linux linux'/g" "${MOUNT}/etc/default/grub"
 sed -i '/^GRUB_DEFAULT=*/iGRUB_DISABLE_SUBMENU=y' "${MOUNT}/etc/default/grub"
+mkdir -p "${MOUNT}/boot/grub"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub"
 arch-chroot "${MOUNT}" /bin/bash -c "grub-install --target=i386-pc ${DEVICE}"
