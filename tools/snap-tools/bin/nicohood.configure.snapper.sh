@@ -37,7 +37,8 @@ create_config log /var/log
 create_config srv /srv
 
 # Do not use timeline snapshot for the log directory. Only back it up using snap-sync.
-snapper -c log set-config TIMELINE_CREATE="no"
+# TODO if this is set, then the restore script wont find any snapshot as backup and will fail.
+#snapper -c log set-config TIMELINE_CREATE="no"
 
 # Create custom snapshot configs
 while IFS= read -r -d '' config

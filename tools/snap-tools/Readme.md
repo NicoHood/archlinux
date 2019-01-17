@@ -359,6 +359,9 @@ ln -s ~/data/spotify ~/.cache/spotify
 
 11. Backup this updated tutorial!!!
 
+### Migration from 1.0.2 to 1.0.3
+* Fix restore script transmitting unavailable snapshot.
+
 ### Migration from 1.0.1 to 1.0.2
 * Fixed Bug "grub-mkconfig failes"
 
