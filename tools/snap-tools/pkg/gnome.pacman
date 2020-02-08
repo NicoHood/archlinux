@@ -20,6 +20,7 @@ gnome-settings-daemon
 gnome-shell
 vino
 gvfs
+gvfs-mtp
 mutter
 sushi
 xdg-user-dirs-gtk
