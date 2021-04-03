@@ -64,15 +64,16 @@ if [[ "${LUKS}" == "y" ]]; then
     fi
 
     # Create cryptodisks
+    # TODO use Luks 2 when grub 2.06 was released (remove --type luks1): https://savannah.gnu.org/bugs/?55093
     warning "For better security overwrite the disk with random bytes first."
     plain "Creating and opening root luks container"
     if [[ -z "${PASSWD_ROOT}" ]]; then
-        until cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
+        until cryptsetup luksFormat --type luks1 -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
         do
             error "Please enter a correct Luks password."
         done
     else
-        echo "${PASSWD_ROOT}" | cryptsetup luksFormat -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
+        echo "${PASSWD_ROOT}" | cryptsetup luksFormat --type luks1 -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
     fi
 
     # Open cryptodisks
@@ -154,7 +155,7 @@ mkfs.fat -F32 -s 1 -S 4096 -v "${DEVICE}2"
 # Unmount btrfs filesystem
 umount "${MOUNT}"
 if [[ "${LUKS}" == "y" ]]; then
-  cryptsetup luksClose "${LUKS_UUID}"
+    cryptsetup luksClose "${LUKS_UUID}"
 fi
 
 msg "Creating filesystem on for ${DEVICE} with temporary mountpoint ${MOUNT} succeeded."
