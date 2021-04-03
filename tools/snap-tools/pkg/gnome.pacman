@@ -33,6 +33,7 @@ mousetweaks
 gnome-shell-extensions
 
 gnome-backgrounds
+elementary-wallpapers
 arc-gtk-theme
 gnome-themes-extra
 arc-icon-theme
@@ -61,6 +62,7 @@ pavucontrol
 pulseaudio-alsa
 pulseaudio-zeroconf
 pulseaudio-bluetooth
+pulseaudio-rtp
 
 cups
 gutenprint

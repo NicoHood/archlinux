@@ -1,7 +1,10 @@
 base
+linux
+linux-headers
 linux-lts
 linux-lts-headers
-linux-headers
+linux-firmware
+nano
 grub
 efibootmgr
 bash-completion
@@ -12,3 +15,9 @@ sudo
 btrfs-progs
 dosfstools
 ntfs-3g
+cryptsetup
+device-mapper
+logrotate
+man-db
+man-pages
+usbutils

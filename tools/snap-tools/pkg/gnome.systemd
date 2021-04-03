@@ -1,6 +1,6 @@
 NetworkManager
 bluetooth
 gdm
-org.cups.cupsd
+cups
 avahi-daemon
 rngd
