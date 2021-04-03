@@ -34,12 +34,14 @@ if [[ "${INTERACTIVE}" == y ]]; then
     msg "Settings:"
     read -rp "Enter username: " -e -i "${MY_USERNAME}" MY_USERNAME
     read -rsp "Please enter your user password. If none was entered, the default password gets used." PASSWD_USER
+    echo
     read -rp "Enter hostname: " -e -i "${MY_HOSTNAME}" MY_HOSTNAME
     read -rp "Install gnome desktop environment? " -e -i "${GNOME}" GNOME
     read -rp "Use luks encryption? " -e -i "${LUKS}" LUKS
     # Ask for password
     if [[ "${LUKS}" == "y" ]]; then
         read -rsp "Please enter your luks password. If none was entered, the default password gets used." PASSWD_ROOT
+        echo
     fi
     read -rp "Enter keyboard layout: " -e -i "${KEYBOARD_LAYOUT}" KEYBOARD_LAYOUT
     if [ -f ~/install.txt ]; then
