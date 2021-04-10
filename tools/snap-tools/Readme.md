@@ -628,5 +628,4 @@ LOGDEST=/home/user/data/makepkg/log
 * AUR package
 * Makefile
 * Script names?
-* Add out of memory manager service
 * Fix bug with subvolumes in nautilus https://gitlab.gnome.org/GNOME/glib/issues/1271
