@@ -229,13 +229,13 @@ fat32
     # Does not seem so!?
     ```
 4. Backup initramfs, fstab and grub config using `.bak` files
-    ```bash
+
+```bash
 #!/bin/bash
 set -x
 set -e
 set -o errexit -o errtrace -u
 LUKS=y
-    ```
 
 # Check if run as root
 [[ "${EUID}" -ne 0 ]] && echo "You must be a root user." && exit 1
@@ -282,7 +282,7 @@ arch-chroot "${MNT_NEW}" /bin/bash -c "grub-install --target=i386-pc ${DEVICE_NE
 install -Dm 755 "${MNT_NEW}/boot/efi/EFI/grub/grubx64.efi" "${MNT_NEW}/boot/efi/EFI/boot/bootx64.efi"
 install -Dm 755 "${MNT_NEW}/boot/efi/EFI/grub/grubx64.efi" "${MNT_NEW}/boot/efi/EFI/debian/grubx64.efi"
 install -Dm 755 "${MNT_NEW}/boot/efi/EFI/grub/grubx64.efi" "${MNT_NEW}/boot/efi/EFI/Redhat/grub.efi"
-    ```
+```
 
 5. Manually merge the old configs for initramfs, fstab and grub with the new ones
     ```bash
