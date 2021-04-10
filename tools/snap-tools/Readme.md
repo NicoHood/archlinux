@@ -83,6 +83,8 @@ The `snapshots` directory also has the same layout as a snap-sync backup. This m
 
 Additionally some subvolumes are excluded from the backup, such as the pacman package cache and `data`. This data storage can be used for large persistent data which does not require (automated) backups such as VMs, makepkg, spotify, steam data.
 
+The `backup` subvolume is used when you want to use the disk as backup drive, but also make it bootable. Backups from other systems should be stored there.
+
 An embedded initramfs keyfile is used to unlock the root partition at boot, [without having to enter the password twice](https://wiki.archlinux.org/index.php/Dm-crypt/Device_encryption#With_a_keyfile_embedded_in_the_initramfs). Make sure to chmod further kernels to permission 600!
 
 ```
