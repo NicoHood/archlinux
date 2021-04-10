@@ -511,21 +511,36 @@ sudo pacman -S base base-devel --needed
 # Check for modified config files:
 pacman -Qii | grep ^MODIFIED | cut -f2
 
+# List AUR packages, and check if all of them are manually installed or not required anymore (dropped by archlinux devs).
+pacman -Qm
+
 # Remove orphans:
 sudo pacman -Rns $(pacman -Qtdq)
 
 # Clean package cache:
 sudo pacman -Sc
 
-# Clean systemd logs (free ~2G)
-journalctl --vacuum-time=10d
-
 # TODO Check list of explicitely installed packages
 ```
 
-5. Update Grub Bootloader
-Optional, not essentially required
-TODO
+5. Limit journald (logfile) size:
+
+  ```bash
+  sudo mkdir -p /etc/systemd/journald.conf.d
+  sudo nano /etc/systemd/journald.conf.d/00-journal-size.conf
+  -------------------------------------------------
+  [Journal]
+  SystemMaxUse=50M
+  -------------------------------------------------
+  sudo systemctl restart systemd-journald.service
+  
+  # Clean systemd logs (free ~2G)
+  journalctl --vacuum-time=10d
+  ```
+
+6. Update Grub Bootloader
+    Optional, not essentially required
+    TODO
 
 ## After installation
 * Change default user password `passwd`
@@ -542,6 +557,7 @@ TODO
 * Check if `systemctl status rngd.service` is active, otherwise install `haveged` (e.g. if you have slow boot time)
 * Enable [remote unlocking](https://wiki.archlinux.org/index.php/Dm-crypt/Specialties#Remote_unlocking_.28hooks:_netconf.2C_dropbear.2C_tinyssh.2C_ppp.29)
 * Setup snap-sync backups. Pay attention to use `backup/$HOSTNAME/custom` as location for the custom subvolumes. Otherwise they are not recognized properly while restoring.
+* Limit journald (logfile) size, as described above.
 
 
 
