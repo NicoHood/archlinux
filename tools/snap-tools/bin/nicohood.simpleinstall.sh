@@ -71,7 +71,7 @@ arch-chroot "${MOUNT}" /bin/bash -c "hwclock --systohc --utc"
 arch-chroot "${MOUNT}" /bin/bash -c "systemctl enable systemd-timesyncd.service"
 
 # Set locale, only english language (not keyboard layout!) is supported by this script
-sed -i '/en_US.UTF-8 UTF-8/s/^#//g' "${MOUNT}"/etc/locale.gen
+sed -i '/#en_US.UTF-8 UTF-8/s/^#//g' "${MOUNT}"/etc/locale.gen
 arch-chroot "${MOUNT}" /bin/bash -c "locale-gen"
 echo 'LANG=en_US.UTF-8' > "${MOUNT}"/etc/locale.conf
 # /etc/locale.conf already contains LANG=en_US.UTF-8 by default
