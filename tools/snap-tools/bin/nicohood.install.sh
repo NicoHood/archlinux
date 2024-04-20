@@ -199,8 +199,8 @@ install -Dm 755 "${MOUNT}/boot/efi/EFI/grub/grubx64.efi" "${MOUNT}/boot/efi/EFI/
 # User check
 msg "4 Reboot"
 sync
-plain "Installation successful. System still mounted at ${MOUNT}. Unmount and reboot now? [Y/n]"
 warning "You need to change the default disk and user password after the reboot!"
+plain "Installation successful. System still mounted at ${MOUNT}. Unmount and reboot now? [Y/n]"
 read -r yesno
 if [[ "${yesno}" != [Yy]"es" && "${yesno}" != [Yy] && -n "${yesno}" ]]; then
     abort_exit
