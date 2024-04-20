@@ -32,18 +32,7 @@ function create_config()
 # NOTE: /var/tmp and /var/cache/pacman/pkg will not be backed up, even if technically possible.
 create_config root /
 create_config home /home
-create_config user /home/user
-create_config log /var/log
-
-# Do not use timeline snapshot for the log directory. Only back it up using snap-sync.
-# TODO if this is set, then the restore script wont find any snapshot as backup and will fail.
-#snapper -c log set-config TIMELINE_CREATE="no"
-
-# Create custom snapshot configs
-while IFS= read -r -d '' config
-do
-    create_config "${config}" "/home/user/${config}"
-done < <(find "/.btrfs/snapshots/custom" -maxdepth 1 -mindepth 1 -type d -printf '%f\0')
+create_config data /data
 
 # Enable services
 systemctl enable --now snapper-boot.timer

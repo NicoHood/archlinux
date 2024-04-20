@@ -47,6 +47,11 @@ mount -o subvol=subvolumes/home "${ROOT_DEVICE}" "${MOUNT}/home"
 mkdir -p "${MOUNT}/home/.snapshots"
 mount -o subvol=snapshots/home "${ROOT_DEVICE}" "${MOUNT}/home/.snapshots"
 
+mkdir -p "${MOUNT}/data"
+mount -o subvol=subvolumes/data "${ROOT_DEVICE}" "${MOUNT}/data"
+mkdir -p "${MOUNT}/data/.snapshots"
+mount -o subvol=snapshots/data "${ROOT_DEVICE}" "${MOUNT}/data/.snapshots"
+
 mkdir -p "${MOUNT}/var/cache/pacman/pkg"
 mount -o subvol=subvolumes/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg"
 

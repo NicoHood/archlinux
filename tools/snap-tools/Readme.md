@@ -103,7 +103,8 @@ btrfs
     |-- backup -> /backup
     |   `-- $hostname
     |       |-- root
-    |       `-- home
+    |       |-- home
+    |       `-- data
     `-- luks -> /root/luks (root:root 000)
         `-- crypto_keyfile.bin (root:root 000)
 
