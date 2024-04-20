@@ -36,7 +36,7 @@ fi
 plain "Using luks disk encryption: ${LUKS}."
 
 # Let luks ask for the password if not passed to the script
-# TODO ask for the password here, if luks was used
+# TODO ask for the password here, if luks was used (so we dont have to type it 4 times later on). This is not so important to fix now.
 PASSWD_ROOT="${PASSWD_ROOT:-""}"
 
 # Partition disk:
