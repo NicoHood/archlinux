@@ -64,12 +64,10 @@ if [[ "${LUKS}" == "y" ]]; then
     fi
 
     # Create cryptodisks
-    # TODO use Luks 2 when grub 2.06 was released (remove --type luks1): https://savannah.gnu.org/bugs/?55093
-    # TODO also change to argon2id: https://uwot.eu/blog/luks2-the-right-way-argon2/
     warning "For better security overwrite the disk with random bytes first."
     plain "Creating and opening root luks container"
     if [[ -z "${PASSWD_ROOT}" ]]; then
-        until cryptsetup luksFormat --type luks1 -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
+        until cryptsetup luksFormat --type luks2 --pbkdf argon2id -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
         do
             error "Please enter a correct Luks password."
         done
