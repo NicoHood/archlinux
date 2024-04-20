@@ -95,7 +95,6 @@ btrfs
     |   |-- home -> /home
     |   |-- pkg  -> /var/cache/pacman/pkg
     |   |-- tmp  -> /var/tmp
-    |   |-- srv  -> /srv
     |   `-- data -> /data
     |-- snapshots
     |   |-- root -> /.snapshots
