@@ -200,10 +200,10 @@ fat32
     #MNT_BACKUP=/run/media/nicohood/e5b8a2d6-85a1-4640-a659-acb8d6922bd6
     #MNT_NEW=/mnt    
     sudo mkdir -p "${MNT_BACKUP}" "${MNT_NEW}"
-
+    
     # Mount the new filesystem
     sudo nicohood.mount "${DEVICE_NEW}" "${MNT_NEW}"
-
+    
     # Mount backup disk
     sudo cryptsetup luksOpen /dev/sdX backup
     sudo mount /dev/mapper/backup "${MNT_BACKUP}"
@@ -213,20 +213,20 @@ fat32
     ```bash
     # NOTE: Make sure to restore the *correct and most up to date backup*. `ls` listings do not put the highest number last!
     ls "${MNT_BACKUP}"/backup/$hostname/*/ -la
-
+    
     # https://wiki.archlinux.org/index.php/rsync#Full_system_backup
     sudo rsync -aAXH --numeric-ids --info=progress2 "${MNT_BACKUP}"/backup/zebes/root/6557/snapshot/. "${MNT_NEW}"
-
+    
     # Transfer user data (user subfolder!)
     # NOTE: If you have multiple users on the system, make sure to transfere them as well!
     sudo rsync -aAXH --numeric-ids --info=progress2 "${MNT_BACKUP}"/backup/zebes/home/6251/snapshot/nicohood/. "${MNT_NEW}"/home/user
-
+    
     # Transfer other snapshots
     sudo rsync -aAXH --numeric-ids --info=progress2 "${MNT_BACKUP}"/backup/E744/hackallthethings/7509/snapshot/. "${MNT_NEW}"/home/user/hackallthethings
-
+    
     # Transfer manual backups
     sudo rsync -aAXH --numeric-ids --info=progress2 "${MNT_BACKUP}"/backup/E744/data/20181024/. "${MNT_NEW}"/home/user/data
-
+    
     # TODO chmod 700 /.btrfs, as rsync overrides this setting. Or the mount command should add this as mount option?
     # Does not seem so!?
     ```
@@ -298,10 +298,10 @@ install -Dm 755 "${MNT_NEW}/boot/efi/EFI/grub/grubx64.efi" "${MNT_NEW}/boot/efi/
     set -x
     DEVICE_NEW=/dev/sda
     MNT_NEW=/mnt
-
+    
     # Mkinitcpio
     arch-chroot "${MNT_NEW}" /bin/bash -c "mkinitcpio -P"
-
+    
     # Grub
     arch-chroot "${MNT_NEW}" /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
     arch-chroot "${MNT_NEW}" /bin/bash -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub"
@@ -539,8 +539,23 @@ sudo pacman -Sc
   ```
 
 6. Update Grub Bootloader
-    Optional, not essentially required
-    TODO
+   
+    Optional, not essentially required. Be careful!
+    
+```bash
+sudo cp /boot/grub/grub.cfg /boot/grub/grub.cfg.bak
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+# Do a manual check if the new config is ok.
+sudo diff -u /boot/grub/grub.cfg.bak /boot/grub/grub.cfg
+sudo grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub
+sudo cp /boot/efi/EFI/grub/grubx64.efi /boot/efi/EFI/boot/bootx64.efi
+sudo cp /boot/efi/EFI/grub/grubx64.efi /boot/efi/EFI/debian/grubx64.efi
+sudo cp /boot/efi/EFI/grub/grubx64.efi /boot/efi/EFI/Redhat/grub.efi
+lsblk
+sudo grub-install --target=i386-pc /dev/sdX
+```
+
+​    
 
 ## After installation
 * Change default user password `passwd`
@@ -607,7 +622,23 @@ eval $(thefuck --alias)
 "\e[1;2B": history-search-forward
 ```
 
+[Or via local file](https://askubuntu.com/a/59855/1199962):
+
+```bash
+~/.inputrc
+------------
+# Respect default shortcuts.
+$include /etc/inputrc
+
+# Use Shift+Up/Down to search history
+"\e[1;2A": history-search-backward
+"\e[1;2B": history-search-forward
+```
+
+
+
 ### makepkg.conf
+
 ```
 mkdir -p ~/data/makepkg/{src,pkg,srcpkg,log}
 ~/.makepkg.conf
