@@ -93,39 +93,18 @@ btrfs
     |-- subvolumes
     |   |-- root -> /
     |   |-- home -> /home
-    |   |-- user -> /home/user (1000:1000 700)
     |   |-- pkg  -> /var/cache/pacman/pkg
     |   |-- tmp  -> /var/tmp
-    |   |-- log  -> /var/log
     |   |-- srv  -> /srv
-    |   `-- custom
-    |       |-- git -> /home/user/git (1000:1000)
-    |       |-- data -> /home/user/data (1000:1000)
-    |       |-- vm -> /home/user/vm (1000:1000)
-    |       |-- Documents -> /home/user/Documents (1000:1000)
-    |       |-- Downloads -> /home/user/Downloads (1000:1000)
-    |       |-- Pictures -> /home/user/Pictures (1000:1000)
-    |       |-- Music -> /home/user/Music (1000:1000)
-    |       |-- Videos -> /home/user/Videos (1000:1000)
-    |       `-- ...
+    |   `-- data -> /data
     |-- snapshots
     |   |-- root -> /.snapshots
     |   |-- home -> /home/.snapshots
-    |   |-- user -> /home/user/.snapshots
-    |   |-- pkg  -> /var/cache/pacman/pkg/.snapshots
-    |   |-- tmp  -> /var/tmp/.snapshots
-    |   |-- log  -> /var/log/.snapshots
-    |   |-- srv  -> /srv/.snapshots
-    |   `-- custom
-    |       `-- ...
+    |   `-- data -> /data/.snapshots
     |-- backup -> /backup
     |   `-- $hostname
     |       |-- root
-    |       |-- home
-    |       |-- user
-    |       |-- ...
-    |       `-- custom
-    |           `-- ...
+    |       `-- home
     `-- luks -> /root/luks (root:root 000)
         `-- crypto_keyfile.bin (root:root 000)
 

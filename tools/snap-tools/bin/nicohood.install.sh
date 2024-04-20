@@ -5,16 +5,13 @@
 source "${BASH_SOURCE%/*}/nicohood.common"
 
 # Check input parameters
-if [[ "$#" -lt 1 || "$1" == "--help" || "$1" == "-h" ]]; then
-    echo "Usage: $(basename "$0") <device> [subvolumes]"
-    echo "Default subvolumes: ${DEFAULT_SUBVOLUMES[*]}"
+if [[ "$#" -ne 1 || "$1" == "--help" || "$1" == "-h" ]]; then
+    echo "Usage: $(basename "$0") <device>"
     exit 0
 fi
 
 # Get parameters
 DEVICE="${1}"
-shift
-SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 
 # Check user, device and mountpoint
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
@@ -85,7 +82,7 @@ fi
 
 # Create filesystems
 msg2 "1.5 Partition the disks"
-PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}" "${SUBVOLUMES[@]}"
+PASSWD_ROOT="${PASSWD_ROOT}" LUKS="${LUKS}" nicohood.mkfs "${DEVICE}"
 
 # Create temporary mountpoint
 msg2 "1.6 Mount the file systems"

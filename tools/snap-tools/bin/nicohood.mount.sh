@@ -49,28 +49,12 @@ mount -o subvol=snapshots/home "${ROOT_DEVICE}" "${MOUNT}/home/.snapshots"
 
 mkdir -p "${MOUNT}/var/cache/pacman/pkg"
 mount -o subvol=subvolumes/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg"
-mkdir -p "${MOUNT}/var/cache/pacman/pkg/.snapshots"
-mount -o subvol=snapshots/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg/.snapshots"
 
 mkdir -p "${MOUNT}/var/tmp"
 mount -o subvol=subvolumes/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp"
-mkdir -p "${MOUNT}/var/tmp/.snapshots"
-mount -o subvol=snapshots/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp/.snapshots"
-
-mkdir -p "${MOUNT}/var/log"
-mount -o subvol=subvolumes/log "${ROOT_DEVICE}" "${MOUNT}/var/log"
-mkdir -p "${MOUNT}/var/log/.snapshots"
-mount -o subvol=snapshots/log "${ROOT_DEVICE}" "${MOUNT}/var/log/.snapshots"
 
 mkdir -p "${MOUNT}/srv"
 mount -o subvol=subvolumes/srv "${ROOT_DEVICE}" "${MOUNT}/srv"
-mkdir -p "${MOUNT}/srv/.snapshots"
-mount -o subvol=snapshots/srv "${ROOT_DEVICE}" "${MOUNT}/srv/.snapshots"
-
-mkdir -p "${MOUNT}/home/user"
-mount -o subvol=subvolumes/user "${ROOT_DEVICE}" "${MOUNT}/home/user"
-mkdir -p "${MOUNT}/home/user/.snapshots"
-mount -o subvol=snapshots/user "${ROOT_DEVICE}" "${MOUNT}/home/user/.snapshots"
 
 # Mount btrfs real root directory to /.btrfs
 # TODO chmod 700 /.btrfs, as rsync overrides this setting. Or the mount command should add this as mount option?
@@ -83,15 +67,6 @@ mkdir -p "${MOUNT}/backup"
 mount -o subvol=backup "${ROOT_DEVICE}" "${MOUNT}/backup"
 mkdir -p "${MOUNT}/root/luks"
 mount -o subvol=luks "${ROOT_DEVICE}" "${MOUNT}/root/luks"
-
-# Mount custom user subvolumes
-plain "Mounting custom user subvolumes."
-while IFS= read -d $'\0' -r directory ; do
-    mkdir -p "${MOUNT}/home/user/${directory}"
-    mount -o subvol="subvolumes/custom/${directory}" "${ROOT_DEVICE}" "${MOUNT}/home/user/${directory}"
-    mkdir -p "${MOUNT}/home/user/${directory}/.snapshots"
-    mount -o subvol="snapshots/custom/${directory}" "${ROOT_DEVICE}" "${MOUNT}/home/user/${directory}/.snapshots"
-done < <(find "${MOUNT}/.btrfs/snapshots/custom" -maxdepth 1 -mindepth 1 -type d -printf '%f\0')
 
 # Mount efi partition
 mkdir -p "${MOUNT}/boot/efi"

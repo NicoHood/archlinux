@@ -5,18 +5,15 @@
 source "${BASH_SOURCE%/*}/nicohood.common"
 
 # Check input parameters
-if [[ "$#" -lt 1 || "$1" == "--help" || "$1" == "-h" ]]; then
-    echo "Usage: $(basename "$0") <device> [subvolumes]"
+if [[ "$#" -ne 1 || "$1" == "--help" || "$1" == "-h" ]]; then
+    echo "Usage: $(basename "$0") <device> "
     echo "Creates a partition layout with encrypted btrfs root filesystem."
-    echo "Support Bios and Uefi installations."
-    echo "Default subvolumes: ${DEFAULT_SUBVOLUMES[@]}"
+    echo "Support BIOS and UEFI installations."
     exit 0
 fi
 
 # Get parameters
 DEVICE="${1}"
-shift
-SUBVOLUMES=(${@:-${DEFAULT_SUBVOLUMES[@]}})
 
 # Check user, device and mountpoint
 [[ "${EUID}" -ne 0 ]] && die "You must be a root user."
@@ -99,35 +96,14 @@ btrfs subvolume create "${MOUNT}/backup"
 btrfs subvolume create "${MOUNT}/subvolumes/root"
 mkdir -m 750 "${MOUNT}/subvolumes/root/root"
 btrfs subvolume create "${MOUNT}/subvolumes/home"
-btrfs subvolume create "${MOUNT}/subvolumes/user"
 btrfs subvolume create "${MOUNT}/subvolumes/pkg"
 btrfs subvolume create "${MOUNT}/subvolumes/tmp"
 chmod 1777 "${MOUNT}/subvolumes/tmp"
-btrfs subvolume create "${MOUNT}/subvolumes/log"
 btrfs subvolume create "${MOUNT}/subvolumes/srv"
-chmod 700 "${MOUNT}/subvolumes/user"
-chown 1000:1000 "${MOUNT}/subvolumes/user"
-btrfs subvolume create "${MOUNT}/subvolumes/custom"
-
-for subvol in "${SUBVOLUMES[@]}"
-do
-   btrfs subvolume create "${MOUNT}/subvolumes/custom/${subvol}"
-   chown 1000:1000 "${MOUNT}/subvolumes/custom/${subvol}"
-done
 
 # Create subvolumes for snapshots
 btrfs subvolume create "${MOUNT}/snapshots/root"
 btrfs subvolume create "${MOUNT}/snapshots/home"
-btrfs subvolume create "${MOUNT}/snapshots/user"
-btrfs subvolume create "${MOUNT}/snapshots/pkg"
-btrfs subvolume create "${MOUNT}/snapshots/tmp"
-btrfs subvolume create "${MOUNT}/snapshots/log"
-btrfs subvolume create "${MOUNT}/snapshots/srv"
-btrfs subvolume create "${MOUNT}/snapshots/custom"
-for subvol in "${SUBVOLUMES[@]}"
-do
-   btrfs subvolume create "${MOUNT}/snapshots/custom/${subvol}"
-done
 
 # Create subvolumes untracked by snapper
 btrfs subvolume create "${MOUNT}/luks"

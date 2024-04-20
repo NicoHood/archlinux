@@ -9,9 +9,6 @@ echo "ArchLinux install scripts ${VERSION} https://github.com/NicoHood"
 echo "More information: https://wiki.archlinux.org/index.php/installation_guide"
 echo ""
 
-# Default settings
-DEFAULT_SUBVOLUMES=(git vm data Documents Videos Music Downloads Pictures)
-
 # Avoid any encoding problems
 export LANG=C
 
