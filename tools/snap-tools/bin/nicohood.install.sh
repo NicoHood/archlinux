@@ -161,8 +161,8 @@ if [[ "${LUKS}" == "y" ]]; then
     warning "Setting initramfs permissions to 600. Make sure to also change permissions for your own installed kernels."
     chmod 600 "${MOUNT}"/boot/initramfs-linux*
 
-    # Add "keymap, encrypt" hooks and "/usr/bin/btrfs" to binaries
-    sed -i 's/^HOOKS=(.*block/\0 keymap encrypt/g' "${MOUNT}"/etc/mkinitcpio.conf
+    # Add "encrypt" hooks and "/usr/bin/btrfs" to binaries
+    sed -i 's/^HOOKS=(.*block/\0 encrypt/g' "${MOUNT}"/etc/mkinitcpio.conf
     sed -i "s#^FILES=(#\0/root/luks/crypto_keyfile.bin#g" "${MOUNT}"/etc/mkinitcpio.conf
 fi
 sed -i "s#^BINARIES=(#\0/usr/bin/btrfs#g" "${MOUNT}"/etc/mkinitcpio.conf
