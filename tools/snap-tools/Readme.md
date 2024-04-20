@@ -44,6 +44,13 @@ extra-x86_64-build
 gpg --recv-keys 51DAE9B7C1AE9161
 ```
 
+#### Testing
+```
+cd bin
+ln -s nicohoood.common.sh nicohoood.common
+export PATH=$PATH:$(pwd)
+```
+
 ### Backup Concept
 This script does not only install Arch Linux, it also sets up the system for a well thought-out backup concept. The backup concept relies on a specific partition and filesystem layout, which is described below. The most important aspects are:
 * Hourly/Daily/Weekly/Monthly on-disk snapshots using [snapper](https://github.com/openSUSE/snapper)
