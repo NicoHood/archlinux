@@ -47,7 +47,11 @@ gpg --recv-keys 51DAE9B7C1AE9161
 #### Testing
 ```
 cd bin
-ln -s nicohoood.common.sh nicohoood.common
+ln -s nicohood.common.sh nicohood.common
+ln -s nicohood.mkfs.sh nicohood.mkfs
+ln -s nicohood.mount.sh nicohood.mount
+ln -s nicohood.umount.sh nicohood.umount
+ln -s ../pkg pkg
 export PATH=$PATH:$(pwd)
 ```
 
