@@ -64,12 +64,13 @@ if [[ "${LUKS}" == "y" ]]; then
     warning "For better security overwrite the disk with random bytes first."
     plain "Creating and opening root luks container"
     if [[ -z "${PASSWD_ROOT}" ]]; then
-        until cryptsetup luksFormat --type luks2 --pbkdf argon2id -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
+        # TODO Grub does not yet support argon2id, but at least it supports luks2 now: https://wiki.archlinux.org/title/GRUB#LUKS2
+        until cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
         do
             error "Please enter a correct Luks password."
         done
     else
-        echo "${PASSWD_ROOT}" | cryptsetup luksFormat --type luks1 -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
+        echo "${PASSWD_ROOT}" | cryptsetup luksFormat --type luks2 --pbkdf pbkdf2 -c aes-xts-plain64 -s 512 -h sha512 --use-random "${DEVICE}3"
     fi
 
     # Open cryptodisks
