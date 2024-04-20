@@ -59,10 +59,12 @@ mkdir -p "${MOUNT}/var/tmp"
 mount -o subvol=subvolumes/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp"
 
 # Mount btrfs real root directory to /.btrfs
-# TODO chmod 700 /.btrfs, as rsync overrides this setting. Or the mount command should add this as mount option?
 plain "Mounting root btrfs."
 mkdir -p "${MOUNT}/.btrfs"
 mount "${ROOT_DEVICE}" "${MOUNT}/.btrfs"
+if [[ "$(stat -c "%a" "${MOUNT}/.btrfs")" != "700" ]]; then
+    warning "Root directory mounted to ${MOUNT}/.btrfs is not set to 700 permission! This is dangerous!"
+fi
 
 # Mount backup and luks subvolume
 mkdir -p "${MOUNT}/backup"
