@@ -96,6 +96,7 @@ btrfs subvolume create "${MOUNT}/backup"
 btrfs subvolume create "${MOUNT}/subvolumes/root"
 mkdir -m 750 "${MOUNT}/subvolumes/root/root"
 btrfs subvolume create "${MOUNT}/subvolumes/home"
+btrfs subvolume create "${MOUNT}/subvolumes/data"
 btrfs subvolume create "${MOUNT}/subvolumes/pkg"
 btrfs subvolume create "${MOUNT}/subvolumes/tmp"
 chmod 1777 "${MOUNT}/subvolumes/tmp"
@@ -103,6 +104,7 @@ chmod 1777 "${MOUNT}/subvolumes/tmp"
 # Create subvolumes for snapshots
 btrfs subvolume create "${MOUNT}/snapshots/root"
 btrfs subvolume create "${MOUNT}/snapshots/home"
+btrfs subvolume create "${MOUNT}/snapshots/data"
 
 # Create subvolumes untracked by snapper
 btrfs subvolume create "${MOUNT}/luks"

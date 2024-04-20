@@ -87,7 +87,7 @@ btrfs subvolume create "${MOUNT}/.btrfs/backup/old"
 btrfs subvolume create "${MOUNT}/.btrfs/backup/old/custom"
 copy_subvolume root
 copy_subvolume home
-copy_subvolume user
+copy_subvolume data
 for config in "${SUBVOLUMES[@]}"
 do
     copy_subvolume "custom/${config}"
