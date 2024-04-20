@@ -34,7 +34,6 @@ create_config root /
 create_config home /home
 create_config user /home/user
 create_config log /var/log
-create_config srv /srv
 
 # Do not use timeline snapshot for the log directory. Only back it up using snap-sync.
 # TODO if this is set, then the restore script wont find any snapshot as backup and will fail.

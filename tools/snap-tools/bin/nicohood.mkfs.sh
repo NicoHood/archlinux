@@ -99,7 +99,6 @@ btrfs subvolume create "${MOUNT}/subvolumes/home"
 btrfs subvolume create "${MOUNT}/subvolumes/pkg"
 btrfs subvolume create "${MOUNT}/subvolumes/tmp"
 chmod 1777 "${MOUNT}/subvolumes/tmp"
-btrfs subvolume create "${MOUNT}/subvolumes/srv"
 
 # Create subvolumes for snapshots
 btrfs subvolume create "${MOUNT}/snapshots/root"

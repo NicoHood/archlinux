@@ -53,9 +53,6 @@ mount -o subvol=subvolumes/pkg "${ROOT_DEVICE}" "${MOUNT}/var/cache/pacman/pkg"
 mkdir -p "${MOUNT}/var/tmp"
 mount -o subvol=subvolumes/tmp "${ROOT_DEVICE}" "${MOUNT}/var/tmp"
 
-mkdir -p "${MOUNT}/srv"
-mount -o subvol=subvolumes/srv "${ROOT_DEVICE}" "${MOUNT}/srv"
-
 # Mount btrfs real root directory to /.btrfs
 # TODO chmod 700 /.btrfs, as rsync overrides this setting. Or the mount command should add this as mount option?
 plain "Mounting root btrfs."
