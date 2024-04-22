@@ -293,6 +293,9 @@ install -Dm 755 "${MNT_NEW}/boot/efi/EFI/grub/grubx64.efi" "${MNT_NEW}/boot/efi/
     arch-chroot "${MNT_NEW}" /bin/bash -c "mkinitcpio -P"
     
     # Grub
+    # Zuerst die korrekte Luks UUID eintragen!
+    blkid "${DEVICE_NEW}3" -o value -s UUID
+    nano "${MNT_NEW}/etc/default/grub"
     arch-chroot "${MNT_NEW}" /bin/bash -c "grub-mkconfig -o /boot/grub/grub.cfg"
     arch-chroot "${MNT_NEW}" /bin/bash -c "grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=grub"
     arch-chroot "${MNT_NEW}" /bin/bash -c "grub-install --target=i386-pc ${DEVICE_NEW}"
@@ -642,6 +645,25 @@ SRCDEST=/home/user/data/makepkg/src
 PKGDEST=/home/user/data/makepkg/pkg
 SRCPKGDEST=/home/user/data/makepkg/srcpkg
 LOGDEST=/home/user/data/makepkg/log
+```
+
+### Filesystem Check
+
+```
+sudo smartctl -t long /dev/sdX
+sudo smartctl -l selftest /dev/sdX
+
+# Hierfür kann das filesystem aktiv gemounted sein
+sudo btrfs device stats /
+sudo btrfs scrub start /mnt
+sudo btrfs scrub status /mnt
+
+# Das Filesystem muss unmounted sein!
+sudo umount /dev/sdX
+sudo btrfs check --readonly -p /dev/mapper/<luks>
+
+# Das dauert SEHR lange!! Kann sicher mit CTRL+C abgebrochen werden
+sudo badblocks -v -n -s /dev/sdX
 ```
 
 ## TODO
